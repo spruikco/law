@@ -1,0 +1,137 @@
+title: VIC settlement statement compliance + post-settlement checklist
+rules:
+  - id: cv-sla-s32-prerequisite
+    description: A vendor must have given a Section 32 Vendor Statement before the contract was signed; failure permits rescission within 28 days unless the vendor acted honestly and reasonably (s 32K).
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32 + 32K"
+    severity: high
+    checkerPrompt: >
+      pass by default — assume Module 1 has handled the s 32 review pre-exchange.
+      needs_review for the composer to remind the supervising solicitor that
+      s 32 review must have happened before exchange.
+
+  - id: cv-adjustment-date-coherence
+    description: Adjustment date should equal the settlement date unless the contract states otherwise.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: General property law convention
+    severity: medium
+    checkerPrompt: >
+      pass if input.adjustmentDate equals input.settlementDate.
+      warning otherwise — confirm contract overrides default.
+
+  - id: cv-rates-period-coherence
+    description: Council and water rates adjustment periods are normally 1 July to 30 June.
+    citation:
+      act: Local Government Act 1989 (Vic)
+      section: General council rating practice
+    severity: low
+    checkerPrompt: >
+      Rating period must include the settlement date. fail if periodStart..periodEnd
+      does not span settlementDate. pass otherwise. Skip if the field is absent.
+
+  - id: cv-land-tax-s96-apportion
+    description: Land tax adjustment is permitted only where the contract permits it; from 1 January 2024 contracts under $10m for a residence cannot apportion land tax (s 10G Sale of Land Act 1962).
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "10G"
+    severity: high
+    checkerPrompt: >
+      warning if landTax is set AND contractPrice.amount < 10000000 AND it appears
+      to be a residence (look at property.addressLine for hints; isOwnersCorpLot true is strong indicator).
+      The composer must confirm whether s 10G applies.
+      pass if landTax is not set.
+
+  - id: cv-land-tax-yearly-period
+    description: Land tax apportionment is on a calendar-year basis (1 January to 31 December).
+    citation:
+      act: Land Tax Act 2005 (Vic)
+      section: "96"
+    severity: medium
+    checkerPrompt: >
+      If landTax is set, pass if yearStart starts on 1 January and yearEnd is 31
+      December of same year. fail otherwise.
+
+  - id: cv-stamp-duty-payable
+    description: Stamp duty under the Duties Act 2000 must be paid within 30 days of settlement; e-conveyancing PEXA settlement collects duty via SRO at settlement.
+    citation:
+      act: Duties Act 2000 (Vic)
+      section: "16 + 17"
+    severity: high
+    checkerPrompt: >
+      needs_review by default — confirm the PEXA workspace is configured to
+      collect duty + that all SRO Duties Online forms have been lodged.
+
+  - id: cv-stamp-duty-foreign-additional
+    description: Foreign purchaser additional duty (FPAD) of 8% applies to residential property purchased by a foreign person (Duties Act 2000 (Vic) s 28A).
+    citation:
+      act: Duties Act 2000 (Vic)
+      section: "28A"
+    severity: critical
+    checkerPrompt: >
+      pass if isForeignPurchaser is false.
+      needs_review if true — confirm FPAD calculated and noted.
+
+  - id: cv-stamp-duty-fhb-concession
+    description: First Home Buyer concession applies under Duties Act 2000 (Vic) Pt 5 Div 4A — full exemption up to $600k, partial up to $750k, principal place of residence requirement.
+    citation:
+      act: Duties Act 2000 (Vic)
+      section: "Pt 5 Div 4A"
+    severity: medium
+    checkerPrompt: >
+      pass if isFirstHomeBuyer is false.
+      needs_review if true — confirm price is within $750k cap and that the purchaser
+      meets the FHB criteria.
+
+  - id: cv-pexa-workspace-prepared
+    description: PEXA workspace must be created, parties invited, financial line items entered, and signed off before settlement.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: e-conveyancing convention (ECNL Pt 4)
+    severity: high
+    checkerPrompt: >
+      warning if pexaWorkspaceId is empty — workspace not yet created.
+      pass if pexaWorkspaceId is set. The composer must include a PEXA reference in the document.
+
+  - id: cv-deposit-released
+    description: Deposit should be held in the vendor's solicitor's trust account until settlement (or earlier under s 27 Sale of Land Act if vendor's interest has been released).
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "27"
+    severity: medium
+    checkerPrompt: >
+      needs_review by default — confirm whether the deposit was released before
+      settlement under s 27 and adjust accordingly.
+
+  - id: cv-water-special-meter-read
+    description: Water authority special meter read is normally ordered 1-2 days before settlement so usage charges can be apportioned.
+    citation:
+      act: Water Act 1989 (Vic)
+      section: General water authority practice
+    severity: low
+    checkerPrompt: >
+      warning if waterUsage is unset and waterRates is set — consider a special
+      meter read. pass if waterUsage is set.
+
+  - id: cv-oc-special-levy
+    description: Outstanding owners corporation special levies must be disclosed in the s 32 and adjusted at settlement.
+    citation:
+      act: Owners Corporations Act 2006 (Vic)
+      section: "23"
+    severity: high
+    checkerPrompt: >
+      pass if ownersCorpFees is unset OR specialLevyOutstanding is unset.
+      needs_review if specialLevyOutstanding is set — confirm disclosure in s 32
+      and that the special levy is included in the adjustments.
+
+  - id: cv-post-settlement-notifications
+    description: Post-settlement notifications must be lodged — Notice of Acquisition (council, water authority, SRO) and registration of transfer.
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: General convention + Local Government Act s 231
+    severity: high
+    checkerPrompt: >
+      needs_review by default — the composed document must include a post-settlement
+      checklist covering council Notice of Acquisition, water authority NoA, SRO
+      Notice of Acquisition, and TLA registration of transfer.

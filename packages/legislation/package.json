@@ -1,0 +1,16 @@
+{
+  "name": "@law/legislation",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "ingest": "tsx src/ingest.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "voyageai": "^0.0.4",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

@@ -1,0 +1,122 @@
+title: VIC PoA — abuse / red-flag detection rules (equity, fiduciary duty, elder-abuse)
+rules:
+  - id: poa-rf-self-dealing
+    description: Express or implied self-dealing — attorney transferring principal's property to themselves or a related party.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "63-65"
+    severity: critical
+    triggerSignals:
+      - Express clause permitting attorney to acquire principal's property
+      - Gift authorisation extending to attorney or attorney's spouse / children
+      - Conflict-of-interest authorisation drafted broadly
+    detectionPrompt: >
+      Look for any indication that the attorney is or may be the recipient of the
+      principal's property — express transfers, gifts, loans on non-arm's-length terms.
+      In Bridgewater v Leahy (1998) 194 CLR 457 the High Court set aside a transaction
+      between attorney and principal as unconscionable. Flag for solicitor review.
+
+  - id: poa-rf-undue-influence
+    description: Indicators of undue influence at signing — coercion, isolation, urgency.
+    citation:
+      act: Equitable doctrine — Yerkey v Jones (1939) 63 CLR 649; Garcia v NAB (1998) 194 CLR 395
+      section: "n/a"
+    severity: critical
+    triggerSignals:
+      - Principal is elderly + recently dependent on attorney
+      - Document executed shortly after a hospitalisation / diagnosis
+      - Witnessed only by professionals procured by the attorney
+      - Principal does not speak English / form not in principal's first language
+      - Attorney financially benefits from the appointment
+    detectionPrompt: >
+      Assess undue-influence risk. The document alone rarely shows pressure — but extracted
+      facts (relationship, recent capacity events, who arranged the appointment, whether
+      ILA was provided) can flag this. needsLawyerConfirm should typically be true.
+
+  - id: poa-rf-capacity-doubt
+    description: Doubts about the principal's decision-making capacity at execution.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "22"
+    severity: critical
+    triggerSignals:
+      - Recent dementia / cognitive-decline diagnosis
+      - Witness's capacity certificate uses qualified language ("appeared to have capacity at times")
+      - Repeated revocation and re-execution
+    detectionPrompt: >
+      Capacity is presumed but rebuttable. If the documents disclose a medical
+      certificate qualifying capacity, or extraction shows the principal is in residential
+      aged care + late-stage cognitive decline, flag the appointment as capacity-doubtful.
+
+  - id: poa-rf-witness-irregularity
+    description: Witness ineligible or non-prescribed — common in suburban GP / family-friend witnessings.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "35"
+    severity: high
+    triggerSignals:
+      - Witness identifies as a family friend / neighbour, not an authorised witness
+      - Both witnesses are family members of the attorney
+      - Witnesses are paid care workers
+    detectionPrompt: >
+      Cross-check witness identities. fail if non-eligible witness signed; needs_review
+      if qualifications are not stated.
+
+  - id: poa-rf-joint-deadlock
+    description: Joint appointment of attorneys with conflict between them — risk of deadlock and the only forum is VCAT.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "44 + Pt 7"
+    severity: medium
+    triggerSignals:
+      - Multiple attorneys appointed jointly without alternates
+      - Attorneys are siblings with known dispute
+      - No tie-breaker mechanism
+    detectionPrompt: >
+      Joint appointments (the default when mode is unstated) require all attorneys to
+      agree on every decision. Where the attorneys are likely to disagree, flag the
+      deadlock risk and suggest re-execution as joint-and-several or with a tie-breaker.
+
+  - id: poa-rf-scope-overreach
+    description: Scope is broader than necessary — e.g. enduring financial PoA when only a one-off real-estate transaction is intended.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "29-31"
+    severity: medium
+    triggerSignals:
+      - Principal still has full capacity at execution
+      - Stated purpose is a single transaction (overseas / hospitalisation)
+      - No conditions or limitations stated
+    detectionPrompt: >
+      Unconstrained enduring financial powers should typically be reserved for genuine
+      capacity-loss planning. If the trigger is a single transaction, recommend a
+      non-enduring (general) PoA for limited scope and term.
+
+  - id: poa-rf-elder-abuse-pattern
+    description: Pattern fitting financial elder abuse — sudden appointment, sudden transfers, isolation from other family.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "Pt 7 (VCAT review)"
+    severity: critical
+    triggerSignals:
+      - Recent isolation of principal from one branch of family
+      - Sudden change of attorney to an in-home carer
+      - Subsequent property sale or large gift
+    detectionPrompt: >
+      Where multiple elder-abuse pattern indicators co-occur, recommend VCAT review under
+      PoA Act Pt 7 — VCAT can revoke, suspend or vary the appointment, and order
+      compensation under s 77.
+
+  - id: poa-rf-missing-acceptance
+    description: Attorney has not signed the acceptance — power cannot be exercised.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "41"
+    severity: high
+    triggerSignals:
+      - Acceptance section blank
+      - Acceptance signed but not dated
+      - Acceptance pre-dates execution by principal
+    detectionPrompt: >
+      Confirm acceptance is present, dated, and post-dates the principal's execution.
+      flag any irregularity.

@@ -1,0 +1,47 @@
+title: Tax triggers to flag in the letter of advice
+rules:
+  - id: tax-windfall-gains
+    description: Property in a rezoned area may trigger Windfall Gains Tax.
+    citation:
+      act: Windfall Gains Tax Act 2021 (Vic)
+      section: "Part 2"
+    severity: high
+    checkerPrompt: >
+      If extraction suggests a recent rezoning (e.g. planning reports,
+      SC referring to rezoning, or notices in s32), flag WGT risk and
+      request confirmation of WGT certificate.
+
+  - id: tax-commercial-property-reform
+    description: Commercial or industrial property — Commercial & Industrial Property Tax Reform Act 2024 (Vic) applies.
+    citation:
+      act: Commercial and Industrial Property Tax Reform Act 2024 (Vic)
+      section: "(general)"
+    severity: critical
+    applies: "landTaxCert.commercialIndicators.length > 0 OR property type indicates commercial/industrial"
+    checkerPrompt: >
+      Flag the commercial-property tax regime: 10-year transition, annual
+      property tax once liability crystallises, exemptions, and first
+      entry-point stamp duty. Warn about large potential tax implications
+      (per PRJ-659).
+
+  - id: tax-land-tax-adjustment
+    description: Land tax adjustable at settlement — ensure SC aligns with s10G.
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "10G"
+    severity: medium
+    applies: "transaction is under prohibition threshold"
+    checkerPrompt: >
+      For land under the s10G threshold, ensure land tax is not being
+      adjusted against the purchaser.
+
+  - id: tax-foreign-purchaser-duty
+    description: Additional duty if purchaser is a foreign person.
+    citation:
+      act: Duties Act 2000 (Vic)
+      section: "3F"
+    severity: medium
+    checkerPrompt: >
+      If there's any indication of foreign ownership (offshore address,
+      ACN/ABN not disclosed), raise the additional foreign purchaser
+      duty question for the lawyer.

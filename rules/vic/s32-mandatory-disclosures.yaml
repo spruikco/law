@@ -1,0 +1,187 @@
+title: Mandatory disclosures under Section 32, Sale of Land Act 1962 (Vic)
+# Seed list of required disclosures. Each must be verified against the
+# extracted s32 bundle. Citations reference Victorian current-in-force text.
+# LAWYER: please review and correct. This is the deterministic coverage
+# layer — every rule here is checked on every review.
+rules:
+  - id: s32-financial-matters
+    description: >
+      Vendor must disclose financial matters affecting the land — mortgages
+      and charges the vendor will discharge at settlement, and any terms
+      contract statement. (s 32A)
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32A"
+    severity: high
+    checkerPrompt: >
+      Inspect the s32 for a statement of mortgages/charges that will be
+      discharged at or before settlement, and amounts owing. Fail if this
+      is absent or unclear.
+
+  - id: s32-insurance
+    description: >
+      Disclosure of particulars of any insurance policy held in relation
+      to the land where the contract is not settled within 12 months.
+      (s 32B)
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32B"
+    severity: medium
+    applies: "particulars.settlementDate is more than 12 months after contract date, OR property includes a residence not yet built"
+    checkerPrompt: >
+      If applicable, verify insurance particulars are disclosed. Flag if
+      settlement is >12 months but no insurance particulars appear.
+
+  - id: s32-land-use
+    description: >
+      Disclosure of easements, covenants and other similar restrictions
+      affecting the land, whether registered or not, including a
+      description of any failure to comply. (s 32C)
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32C"
+    severity: high
+    checkerPrompt: >
+      Check that easements, covenants and restrictions are listed, and
+      that any known non-compliance is disclosed. Cross-check against the
+      title search.
+
+  - id: s32-planning-road-access
+    description: >
+      Disclosure of the planning scheme applicable to the land, the name
+      of the responsible authority, any zone/overlay designation, and
+      whether there is access by road. (s 32C(b), (c), (d))
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32C"
+    severity: high
+    checkerPrompt: >
+      Verify presence of: (a) planning scheme + responsible authority;
+      (b) zoning/overlay designation; (c) a statement about access by road.
+      Any missing element is a fail.
+
+  - id: s32-outgoings
+    description: >
+      Disclosure of rates, taxes, charges or other similar outgoings
+      (including any owing or likely to be owing) affecting the land.
+      (s 32D)
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32D"
+    severity: high
+    checkerPrompt: >
+      Confirm council rates, water rates, land tax and other outgoings
+      are disclosed with amounts. For commercial land, flag any Land
+      Tax Certificate indicating material outstanding liability.
+
+  - id: s32-notices-orders
+    description: >
+      Disclosure of any notices, property orders, declarations, reports
+      or recommendations of a public authority or government department
+      affecting the land of which the vendor might reasonably be expected
+      to have knowledge. (s 32D(c))
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32D"
+    severity: high
+    checkerPrompt: >
+      Look for disclosed notices/orders (building orders, emergency orders,
+      GAIC notices, environmental notices). If the section is blank or
+      "none" is stated without explanation, flag for lawyer review.
+
+  - id: s32-building-permits
+    description: >
+      Disclosure of any building permit issued under the Building Act
+      1993 in the preceding 7 years for a residence on the land, and any
+      applicable owner-builder insurance/warranty. (s 32F)
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32F"
+    severity: high
+    checkerPrompt: >
+      Check for a list of building permits in the last 7 years, or a
+      statement that none have issued. If a permit is disclosed, confirm
+      required owner-builder/defects insurance info is included.
+
+  - id: s32-owners-corp
+    description: >
+      If the land is affected by an Owners Corporation, the vendor must
+      attach an owners corporation certificate and provide prescribed
+      information, OR state that no certificate is available. (s 32G(1))
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32G"
+    severity: critical
+    applies: "ownersCorp.applies === true"
+    checkerPrompt: >
+      If an OC applies, ensure an OC certificate is attached OR there is
+      an express statement of unavailability. Missing certificate without
+      a statement is a critical fail.
+
+  - id: s32-oc-special-levies-damage
+    description: >
+      The OC certificate must disclose current annual fees, special
+      levies, flagged future financial obligations, and damage to
+      property. (Owners Corporations Regulations — certificate form)
+    citation:
+      act: Owners Corporations Act 2006 (Vic)
+      section: "Certificate of OC"
+    severity: high
+    applies: "ownersCorp.applies === true"
+    checkerPrompt: >
+      For the OC certificate, verify disclosure of: annual fees, any
+      special levies, any flagged future financial obligations (not just
+      routine levies — e.g. upcoming major works), and damage to property.
+      Flag any gaps.
+
+  - id: s32-services
+    description: >
+      Disclosure of services (electricity, gas, water, sewerage, telephone)
+      that are NOT connected to the land by marking an X next to each
+      unconnected service. (s 32I)
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32I"
+    severity: high
+    checkerPrompt: >
+      Verify the services grid is present and internally consistent. Flag
+      if any expected service is missing from the grid, OR if the
+      disclosure conflicts with the buyer's evident expectations
+      (e.g. service is marked NOT connected but property is tenanted).
+
+  - id: s32-disclosure-gaic
+    description: >
+      Disclosure of liability for Growth Areas Infrastructure Contribution
+      (GAIC) where applicable. (s 32H)
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32H"
+    severity: medium
+    checkerPrompt: >
+      If the land is in a contribution area, verify GAIC status and any
+      outstanding contributions are disclosed.
+
+  - id: s32-due-diligence-checklist
+    description: >
+      For a residential sale, the vendor must make a due diligence
+      checklist available to purchasers. (s 33A)
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "33A"
+    severity: medium
+    applies: "property is residential"
+    checkerPrompt: >
+      Confirm the due diligence checklist is attached or its availability
+      is indicated before the contract is signed.
+
+  - id: s32-title-search-consistency
+    description: >
+      Title search attached to the s32 should be current and consistent
+      with encumbrance disclosures.
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "32C"
+    severity: medium
+    checkerPrompt: >
+      Compare encumbrances listed in the title search against those
+      disclosed in the s32. Flag any mismatches.

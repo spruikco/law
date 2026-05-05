@@ -1,0 +1,143 @@
+title: VIC LPUL Pt 4.2 + LPUGR Pt 4.2 trust accounting compliance
+rules:
+  - id: ta-r53-bank-reconciles
+    description: The monthly bank reconciliation must balance — the cashbook closing balance must equal the bank closing balance adjusted for unpresented cheques and outstanding deposits.
+    citation:
+      act: Legal Profession Uniform General Rules 2015
+      section: "53"
+    severity: critical
+    checkerPrompt: >
+      Compute reconciliation.reconciles. fail if reconciles is false (a difference greater than 0.005 is a breach).
+      pass if reconciles is true.
+
+  - id: ta-r52-trial-balance
+    description: The trust trial balance must equal the cashbook closing balance.
+    citation:
+      act: Legal Profession Uniform General Rules 2015
+      section: "52"
+    severity: critical
+    checkerPrompt: >
+      fail if trialVsCashbookDifference is greater than 0.005 in absolute terms.
+      pass otherwise.
+
+  - id: ta-s145-no-overdrawn-ledger
+    description: A trust ledger account must not be overdrawn — overdrawing trust money is a breach of LPUL s 145.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "145"
+    severity: critical
+    checkerPrompt: >
+      fail if overdrawnLedgers is non-empty. pass if empty. List the offending ledger names in the explanation.
+
+  - id: ta-r35-receipt-on-receipt
+    description: A trust receipt must be issued immediately on receipt of trust money.
+    citation:
+      act: Legal Profession Uniform General Rules 2015
+      section: "35"
+    severity: high
+    checkerPrompt: >
+      Inspect input.receipts. For each receipt, fail if receiptIssuedAt is missing.
+      pass if every receipt has receiptIssuedAt. warning if receiptIssuedAt is more
+      than 1 day after receivedOn.
+
+  - id: ta-r36-receipt-particulars
+    description: Trust receipts must show prescribed particulars — date, amount, payer, matter, sequential number, "trust receipt" wording.
+    citation:
+      act: Legal Profession Uniform General Rules 2015
+      section: "36"
+    severity: high
+    checkerPrompt: >
+      For each receipt, fail if receiptNumber is empty or if any of {receivedFrom, matterRef, description} is empty.
+      pass if all populated. needs_review on edge cases.
+
+  - id: ta-r38-sequential-payments
+    description: Trust payments must have a sequential reference and a written authority for the withdrawal.
+    citation:
+      act: Legal Profession Uniform General Rules 2015
+      section: "38 + 42"
+    severity: high
+    checkerPrompt: >
+      For each payment, fail if reference is empty.
+      fail if authority is "bill_given_s152" but billNumber is missing.
+      pass otherwise.
+
+  - id: ta-s144-no-mixing
+    description: Trust money must not be mixed with general (office) money.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "144"
+    severity: critical
+    checkerPrompt: >
+      pass by default. needs_review if any payment.description contains words like
+      "office", "general", "salary", "rent", "wage" — these may indicate non-trust
+      use.
+
+  - id: ta-s142-adi-account
+    description: Trust money must be held at an Australian Authorised Deposit-taking Institution (ADI) trust account.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "142 + LPUGR r 39"
+    severity: critical
+    checkerPrompt: >
+      pass if input.bankStatement.bankName is non-empty AND bsb is in BSB format
+      (e.g. /^\d{3}-?\d{3}$/) AND accountName mentions "trust" or "law trust".
+      warning if accountName does not contain "trust" — needs_review.
+      fail if bankName is empty.
+
+  - id: ta-s152-bill-before-withdrawal
+    description: Legal costs may be paid from trust money only after a bill has been given to the client (or other authority).
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "152"
+    severity: critical
+    checkerPrompt: >
+      For each payment with authority="bill_given_s152", needs_review unless billNumber is set
+      (covered by ta-r38). For payments with authority="other", warning — supervisor
+      must confirm the authority.
+      pass if every cost-payment has bill_given_s152 + billNumber, or has a non-cost authority.
+
+  - id: ta-r53-15-business-days
+    description: Monthly bank reconciliation must be prepared within 15 working days of month end, signed by the authorised principal.
+    citation:
+      act: Legal Profession Uniform General Rules 2015
+      section: "53(2)"
+    severity: high
+    checkerPrompt: >
+      pass by default. The composed pack must contain the principal certification —
+      needs_review for the composer.
+      warning if input.practice.trustAuthorisedSolicitorName is empty.
+
+  - id: ta-r65-external-examiner
+    description: A trust account must be externally examined annually by an approved external examiner.
+    citation:
+      act: Legal Profession Uniform General Rules 2015
+      section: "65 + LPUL s 158"
+    severity: medium
+    checkerPrompt: >
+      pass if input.practice.externalExaminerName is set AND
+      externalExaminerLastReportDate is within the last 12 months of periodEnd.
+      warning if last report is older than 12 months.
+      needs_review if examiner is unset.
+
+  - id: ta-cashbook-coherence
+    description: Receipts cashbook + payments cashbook totals must match the receipts/payments arrays.
+    citation:
+      act: Legal Profession Uniform General Rules 2015
+      section: "47 + 48"
+    severity: high
+    checkerPrompt: >
+      Compute cashbookReceiptsTotal vs sum(receipts.amount) and cashbookPaymentsTotal
+      vs sum(payments.amount + transfers as applicable). pass if both match within 0.005.
+      fail if mismatch — implies missing journal entries.
+
+  - id: ta-controlled-money-segregation
+    description: Controlled money must be held in a separate controlled-money account; transit and power money have additional record-keeping.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "139 + LPUGR rr 56-58"
+    severity: medium
+    checkerPrompt: >
+      pass if every receipt with kind != "general_trust" has a matterRef and a clear
+      description identifying the controlled / transit / power purpose.
+      warning if controlled_money receipts appear in this general-trust reconciliation
+      without segregation note.

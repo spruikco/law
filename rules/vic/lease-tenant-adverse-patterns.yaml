@@ -1,0 +1,185 @@
+title: Tenant-adverse clause patterns — commercial leases (2023 LIV baseline)
+# Surfaced to Pass 4 (Opus clause analysis) as a pattern catalogue. The model
+# will match additional provisions against these patterns and apply the stated
+# severity, then propose a polite-but-firm amendment.
+#
+# Weighted toward the three v1 focus areas: ongoing financial obligations,
+# excessive make-good, excessive outgoings.
+rules:
+  # --- ONGOING FINANCIAL OBLIGATIONS ---
+  - id: ap-holdover-rent-uplift
+    description: Holdover rent at a multiple (often 150-200%) of the prior rent.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: high
+    checkerPrompt: >
+      Any clause that, after expiry, continues the tenancy at a multiple of the last rent.
+      Propose amendment: holdover at the last rent (no uplift) or at most 110% for a capped
+      period (e.g. 3 months) then by agreement.
+
+  - id: ap-personal-guarantee-unlimited
+    description: Personal guarantee with no cap and no sunset.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "126"
+    severity: high
+    checkerPrompt: >
+      Any personal guarantee that survives assignment, has no financial cap, or continues
+      indefinitely after lease end. Propose amendment: cap the guarantor liability to 6-12
+      months rent, release on assignment to an equally-covenanted assignee.
+
+  - id: ap-indemnity-uncapped-consequential
+    description: Tenant indemnity extending to consequential / indirect loss.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: high
+    checkerPrompt: >
+      Any indemnity clause extending tenant liability to consequential, indirect, or
+      economic loss, loss of profits, or third-party claims unrelated to tenant fault.
+      Propose amendment: limit to direct losses arising from tenant's breach or negligence.
+
+  - id: ap-survival-post-expiry
+    description: Obligations (indemnity, make-good, arrears, continuing guarantees) that survive termination indefinitely.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: medium
+    checkerPrompt: >
+      Clauses that expressly continue post-expiry with no sunset. Propose amendment: add
+      a reasonable sunset (e.g. 12 months from the date of handover).
+
+  - id: ap-default-interest-punitive
+    description: Default interest rate above 10% above the standard cash rate.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: medium
+    checkerPrompt: >
+      Default interest charged on unpaid rent at a punitive rate. Propose amendment:
+      4-6% above RBA cash rate or landlord's bank overdraft rate.
+
+  # --- EXCESSIVE MAKE-GOOD ---
+  - id: ap-makegood-bare-shell
+    description: Make-good requires reinstatement to bare shell / warm shell / base-build condition.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "52"
+    severity: critical
+    checkerPrompt: >
+      Any clause requiring the tenant to return premises to a bare shell, warm shell, or
+      base-build condition at end of term. This is often a five-to-six-figure cost.
+      Propose amendment: return to condition at commencement, fair wear and tear excepted;
+      no obligation to remove items the landlord wishes to retain (negotiate in writing).
+
+  - id: ap-makegood-remove-all-fitout
+    description: Make-good requires removal of ALL tenant fit-out including items landlord may wish to keep.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: high
+    checkerPrompt: >
+      Clause requiring the tenant to remove every tenant-installed item regardless of
+      landlord's wishes. Propose amendment: landlord nominates items to be removed by
+      notice given at least 3 months before expiry.
+
+  - id: ap-makegood-landlord-election
+    description: Landlord may elect either to require reinstatement OR retain fit-out AND claim cash-in-lieu.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: high
+    checkerPrompt: >
+      "Double-dip" make-good: landlord can choose to take the fit-out AND claim the make-good
+      cost in cash. Propose amendment: cash-in-lieu is an alternative, not an addition, and
+      is the actual cost the landlord will incur (not a penalty rate).
+
+  # --- EXCESSIVE OUTGOINGS ---
+  - id: ap-outgoings-no-cap
+    description: No cap on annual outgoings or on year-on-year increases.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "39"
+    severity: high
+    checkerPrompt: >
+      If outgoings are payable but there is no annual cap or year-on-year cap, flag.
+      Propose amendment: cap increases at CPI or 5% per annum, whichever is higher.
+
+  - id: ap-outgoings-landlord-capital
+    description: Landlord's capital costs recoverable as outgoings.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "41"
+    severity: high
+    checkerPrompt: >
+      Capital expenditure, sinking-fund contributions for capital works, depreciation,
+      financing costs, or costs of structural repairs treated as outgoings. Propose amendment:
+      exclude capital items; outgoings limited to regular operating costs of the premises.
+
+  - id: ap-outgoings-land-tax-single-holding
+    description: Land tax recoverable on a single-holding basis (not on an apportioned basis).
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "50"
+    severity: high
+    checkerPrompt: >
+      Land tax calculated "as if the premises were the landlord's only property" (single-
+      holding basis is actually prohibited for retail leases under s50; for non-retail, still
+      propose apportionment). Propose amendment: land tax apportioned on the same basis as
+      the landlord's total holding.
+
+  - id: ap-outgoings-management-fees
+    description: Management fees paid to landlord or related entity treated as outgoings.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "41"
+    severity: medium
+    checkerPrompt: >
+      Property-management fees charged by a related-party manager recoverable as outgoings.
+      Propose amendment: cap management fees at a market rate (e.g. 3% of rent) and require
+      arms-length contract.
+
+  # --- OTHER TENANT-ADVERSE PATTERNS ---
+  - id: ap-rent-review-ratchet
+    description: Ratchet clause — rent cannot decrease on market review.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "35(2)"
+    severity: high
+    checkerPrompt: >
+      Rent review clause that prevents decrease on market review. For retail, void under
+      s35(2). For non-retail, propose amendment to allow market-up-or-down.
+
+  - id: ap-assignment-unreasonable
+    description: Assignment/subletting subject to unfettered landlord consent.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "144"
+    severity: medium
+    checkerPrompt: >
+      Clause making assignment subject to landlord's absolute discretion rather than
+      reasonable consent not to be unreasonably withheld. Propose amendment: consent not
+      to be unreasonably withheld + 21-day deemed-consent mechanism.
+
+  - id: ap-termination-without-notice
+    description: Landlord can terminate for breach without notice or reasonable cure period.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "146"
+    severity: high
+    checkerPrompt: >
+      Termination rights that bypass s146 notice requirements or give unreasonably short
+      cure periods. Propose amendment: 14 days to cure monetary breach; 30 days for non-
+      monetary breach; landlord must serve s146 notice.
+
+  - id: ap-insurance-all-risk-unlimited
+    description: Tenant required to insure against ALL risks on uncapped sum insured.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: low
+    checkerPrompt: >
+      Unbounded insurance obligations (e.g. "insure to full replacement value and all other
+      risks the landlord may require"). Propose amendment: list specific insurances, capped
+      sums, and limits on landlord's right to require additional cover without notice.

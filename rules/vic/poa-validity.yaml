@@ -1,0 +1,130 @@
+title: VIC Powers of Attorney — formal validity rules under PoA Act 2014 (Vic)
+rules:
+  - id: poa-s22-principal-capacity
+    description: Principal must have decision-making capacity to make the enduring power of attorney at the time of execution.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "22"
+      url: https://www.legislation.vic.gov.au/in-force/acts/powers-attorney-act-2014/036
+    severity: critical
+    checkerPrompt: >
+      Decide whether the document or extraction shows any evidence the principal lacked
+      decision-making capacity at the time of signing. Capacity is presumed (s 4(2))
+      unless rebutted. Look for: capacity statement signed by witness; medical certificate;
+      witness identifying themselves as a registered medical practitioner; evidence of
+      diminished capacity (dementia, advanced age + recent diagnosis). pass = no
+      capacity doubt visible. fail = no capacity statement on the form where one was
+      required (s 35) AND principal is enduring. needs_review = capacity statement absent
+      but the principal's capacity cannot be assessed from the documents.
+
+  - id: poa-s31-must-be-in-prescribed-form
+    description: An enduring power of attorney must be in the prescribed form (or a substantially similar form).
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "31"
+    severity: high
+    checkerPrompt: >
+      Check whether the form follows the prescribed format in PoA Regulations 2015 Sch 1
+      (financial / personal enduring) or substantially complies. pass if it does; fail if
+      it doesn't (e.g. a non-statutory form is used and missing key statutory statements).
+
+  - id: poa-s33-execution-formalities
+    description: Must be signed by the principal in the presence of two witnesses, each of whom signs in the presence of the principal and each other.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "33"
+    severity: critical
+    checkerPrompt: >
+      Verify the execution clause shows: principal's signature + two witnesses' signatures,
+      same date, with the witnesses signing in the presence of the principal and each other
+      (or the document attests to this). fail if fewer than 2 witnesses, or witness signatures
+      undated, or any witness signed at a different time / place.
+
+  - id: poa-s35-witness-qualifications
+    description: One witness must be an authorised witness; the other must be a person aged ≥18 not the attorney, principal's family, or care worker.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "35"
+    severity: critical
+    checkerPrompt: >
+      Inspect witness qualifications. At least one must be an authorised witness — i.e. a
+      person authorised to take affidavits under the Oaths and Affirmations Act 2018, a
+      registered medical practitioner, an Australian legal practitioner, or another category
+      in PoA Regs 2015. The second witness must NOT be the attorney, an attorney's relative,
+      a relative of the principal, or a paid care worker. fail if any witness is excluded
+      or qualifications are not stated.
+
+  - id: poa-s35-capacity-statement
+    description: One witness (the authorised witness) must certify that the principal appeared to have decision-making capacity in relation to the matters covered.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "35(2)"
+    severity: critical
+    checkerPrompt: >
+      Look for the witness's capacity statement on the prescribed form — it appears as a
+      signed certificate that the principal "appeared to me to have decision-making capacity"
+      etc. fail if absent on an enduring power.
+
+  - id: poa-s41-attorney-acceptance
+    description: Each attorney must sign a statement of acceptance before exercising the power.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "41"
+    severity: high
+    checkerPrompt: >
+      Confirm every attorney named has signed (and dated) the statement of acceptance.
+      fail if any acceptance is missing. The power cannot be exercised by an attorney who
+      has not accepted.
+
+  - id: poa-s23-eligible-principal
+    description: Principal must be an adult (≥18) at the time of making the power.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "23"
+    severity: high
+    checkerPrompt: >
+      Confirm principal is an adult at execution. fail if a date of birth or extracted
+      detail shows the principal is under 18. needs_review if not extractable.
+
+  - id: poa-s28-eligible-attorney
+    description: Attorney must be an adult, not insolvent under administration, not a paid care worker / health provider for the principal (with exceptions for personal-matters attorneys), not the principal.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "28"
+    severity: high
+    checkerPrompt: >
+      Cross-check attorney eligibility — adult, not insolvent under administration, not a
+      paid care worker / health provider unless permitted, not the same person as the
+      principal. fail if any disqualifier evident.
+
+  - id: poa-s44-multiple-attorney-mode
+    description: When multiple attorneys are appointed, the document must specify how decisions are made (jointly / jointly and severally / by majority / in succession).
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "44"
+    severity: medium
+    checkerPrompt: >
+      Where multiple attorneys are named, confirm the appointment mode (joint / J&S / majority /
+      successively) is specified. fail if mode is missing or ambiguous — the default under
+      s 44(2) is jointly, which can lead to deadlock.
+
+  - id: poa-s64-attorney-conflict-of-interest
+    description: Attorney must not enter into a transaction in which there is a conflict between attorney's duty and attorney's own interests, unless expressly authorised.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "64"
+    severity: high
+    checkerPrompt: >
+      Inspect whether the document expressly authorises conflict transactions and the
+      scope of any authorisation. needs_review if attorney is the principal's spouse /
+      child and conflict-transaction authorisation is broad — flag for solicitor.
+
+  - id: poa-s65-gift-authorisation
+    description: Attorney must not give a gift unless expressly authorised; even then, only where reasonable having regard to the principal's circumstances.
+    citation:
+      act: Powers of Attorney Act 2014 (Vic)
+      section: "65"
+    severity: high
+    checkerPrompt: >
+      Inspect any express gift authorisation. flag if gifts are authorised "without limit"
+      to the attorney or the attorney's family — high abuse risk and likely VCAT-reviewable.

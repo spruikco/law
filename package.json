@@ -1,0 +1,24 @@
+{
+  "name": "law",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Legal Document Scanner — Victorian Section 32 & Contract of Sale review tool",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=web",
+    "build": "npm run build --workspace=web",
+    "start": "npm run start --workspace=web",
+    "lint": "npm run lint --workspace=web",
+    "fetch:legislation": "tsx packages/legislation/src/fetch-austlii.ts",
+    "ingest:legislation": "tsx packages/legislation/src/ingest.ts"
+  },
+  "devDependencies": {
+    "dotenv": "^17.4.2",
+    "pptxgenjs": "^4.0.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}

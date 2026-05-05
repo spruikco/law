@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.DS_Store
+*.log
+.env
+.env.local
+.env*.local
+
+# Sample PDFs stay checked in; uploaded client PDFs never should
+/uploads/
+/tmp/
+.cache/

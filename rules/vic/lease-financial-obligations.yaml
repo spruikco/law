@@ -1,0 +1,82 @@
+title: Financial obligations triggers on tenant — lease review
+# Used by Pass 4 (Opus) as additional pattern catalogue to catch clauses that
+# impose ongoing financial exposure on the tenant during or after the lease.
+rules:
+  - id: fin-bank-guarantee-excess
+    description: Bank guarantee exceeds 6 months of rent.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "24"
+    severity: medium
+    checkerPrompt: >
+      If the bank guarantee amount is greater than 6 months of commencing rent, flag.
+      Propose amendment: reduce to 3 months rent (common commercial norm) or 6 months
+      if landlord requires additional comfort, with a corresponding release schedule
+      as the lease proceeds.
+
+  - id: fin-sinking-fund
+    description: Tenant required to pay into a landlord-controlled sinking fund.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "41"
+    severity: high
+    checkerPrompt: >
+      Any tenant contribution to a sinking/capital reserve fund held by landlord. Propose
+      amendment: strike; if landlord insists, require contributions to be held in trust
+      with audited accounting and refund on end of term for unspent amounts.
+
+  - id: fin-tax-pass-through-gst
+    description: Tenant required to pay landlord's GST on rent if landlord changes its registration status.
+    citation:
+      act: A New Tax System (Goods and Services Tax) Act 1999 (Cth)
+      section: "(general)"
+    severity: low
+    checkerPrompt: >
+      GST pass-through clauses are normal, but flag anything that shifts the landlord's
+      own GST liability to the tenant beyond the standard recipient-created tax pass.
+      Propose amendment: standard GST-gross up only; no liability for landlord's input
+      tax miscalculations.
+
+  - id: fin-legal-costs-landlord
+    description: Tenant required to pay landlord's legal costs of preparing the lease or variations.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "51"
+    severity: high
+    checkerPrompt: >
+      Clauses making tenant liable for landlord's lease-drafting, negotiation, or variation
+      legal costs. For retail leases, void under s51. For non-retail, propose amendment
+      to strike or cap at a stated amount.
+
+  - id: fin-repair-and-maintain-capital
+    description: Tenant required to maintain and repair to a standard that includes capital repairs.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "52"
+    severity: high
+    checkerPrompt: >
+      Clauses requiring tenant to "keep in good repair" structural, capital, or plant-and-
+      equipment items that are landlord's responsibility. Propose amendment: exclude
+      structural, capital, and landlord's plant items; fair wear and tear excepted.
+
+  - id: fin-rent-acceleration
+    description: Acceleration clause — on default all future rent becomes immediately payable.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: high
+    checkerPrompt: >
+      Any clause that, on breach, makes all future rent for the balance of the term
+      immediately payable as a debt. Propose amendment: damages only, subject to landlord's
+      duty to mitigate (re-let the premises).
+
+  - id: fin-continuing-guarantee-post-assignment
+    description: Personal guarantee continues after the tenant has assigned the lease.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "126"
+    severity: high
+    checkerPrompt: >
+      Any guarantee that survives assignment. Propose amendment: guarantor is released on
+      assignment to an assignee of equivalent or better covenant strength (subject to
+      landlord's reasonable approval).

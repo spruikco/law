@@ -1,0 +1,160 @@
+title: Bank documents unenforceability — lender conduct + statutory voids
+# Pass 3b checks each rule. A finding here means a clause is void, voidable,
+# or unenforceable, OR the borrower / guarantor has a remedy not given to them
+# by the documents themselves.
+rules:
+  - id: bunl-ncc-s76-unjust-transaction
+    description: NCC s 76 — court may reopen unjust transaction (consumer credit).
+    citation:
+      act: National Credit Code (Sch 1 NCCP Act 2009 (Cth))
+      section: "76"
+    severity: high
+    triggerSignals:
+      - "Borrower has special disadvantage (illness, language, age, dependence, financial pressure)"
+      - "Lender knew or ought to have known of the disadvantage"
+      - "No independent legal or financial advice obtained"
+      - "Interest rate or fees materially out of market"
+    detectionPrompt: >
+      Look for indicia of an unjust transaction under s 76: (1) consumer credit per s 5,
+      (2) injustice at the time of transaction, having regard to s 76(2) factors —
+      relative bargaining power, time/place of negotiation, debtor's capacity to protect
+      own interests, whether terms reasonably necessary to protect lender, whether
+      unreasonable provisions, conduct after the transaction. Effect: court may
+      reopen, vary, set aside, refund payments. Cite citizen v Citibank, Khoury v GIO,
+      ASIC v Cash Store as guidance.
+    effect: court_may_reopen
+    doctrine: ncc_unjust_transaction_s76
+
+  - id: bunl-ncc-s78-unconscionable-interest
+    description: NCC s 78 — court may declare interest charge unconscionable.
+    citation:
+      act: National Credit Code
+      section: "78"
+    severity: high
+    triggerSignals:
+      - "Headline interest rate above 24% pa for consumer credit"
+      - "Compounding default interest > 5% above standard rate"
+      - "Comparison rate materially higher than headline (signals fee loading)"
+    detectionPrompt: >
+      Where the interest charge is unconscionable, the court may annul or reduce it under
+      s 78. Look at total cost of credit, comparable products, the borrower's
+      circumstances. Evidence: standard rate, default rate, fees, APR vs comparison.
+    effect: voidable_at_borrower_election
+    doctrine: ncc_unconscionable_interest_s78
+
+  - id: bunl-acl-s20-21-unconscionable
+    description: ACL ss 20–21 unconscionable conduct — equitable + statutory.
+    citation:
+      act: Australian Consumer Law
+      section: "20"
+    severity: high
+    triggerSignals:
+      - "Special disadvantage that lender exploited (Amadio)"
+      - "Volunteer guarantor in spousal/parental relationship with borrower (Garcia)"
+      - "Pressure or urgency at signing without ILA"
+      - "Small-business borrower with no opportunity to negotiate"
+    detectionPrompt: >
+      Unconscionable conduct under unwritten law (s 20) requires special disadvantage +
+      lender knowledge + exploitation. Statutory unconscionability for businesses (s 21)
+      considers s 22 factors: bargaining strength, terms reasonably necessary, undue
+      influence, written terms understood. Effect: contract or term voidable at the
+      affected party's election; court may grant relief under CCA s 87.
+    effect: unfair_term_and_voidable
+    doctrine: acl_unconscionable_s20
+
+  - id: bunl-acl-uct-pt2-3
+    description: ACL Pt 2-3 unfair-contract-term regime — terms void as against consumer or small business.
+    citation:
+      act: Australian Consumer Law
+      section: "23"
+    severity: high
+    triggerSignals:
+      - "Unilateral variation right with no good-faith qualifier"
+      - "Lender's certificate as conclusive evidence"
+      - "Catch-all 'material adverse change' default"
+      - "Asymmetric set-off (lender can; borrower cannot)"
+      - "Broad indemnity covering consequential loss"
+      - "Deemed service shortcuts"
+    detectionPrompt: >
+      Apply s 24 test: term causes significant imbalance, not reasonably necessary to
+      protect a legitimate interest, and would cause detriment if relied on. Plus s 25
+      examples and s 27 standard-form indicia. Note that since November 2023, ACL Pt 2-3
+      applies to small-business contracts where any party has < 100 employees OR turnover
+      < $10m. Penalties for proposing or relying on unfair terms exceed $50m / 30% of
+      adjusted turnover. Effect: term void; rest of contract continues.
+    effect: void
+    doctrine: acl_uct_pt2_3
+
+  - id: bunl-garcia-volunteer-guarantee
+    description: Garcia v NAB — volunteer guarantee unconscionable in equity where lender on constructive notice of unfair imposition.
+    citation:
+      act: Common law (HCA)
+      section: "Garcia v National Australia Bank (1998) 194 CLR 395"
+    severity: critical
+    triggerSignals:
+      - "Guarantor and borrower are spouses / de facto partners / close family"
+      - "Guarantor receives no benefit from the loan"
+      - "Lender did not insist on independent legal advice"
+      - "Lender did not explain effect of guarantee directly to guarantor"
+    detectionPrompt: >
+      Where the guarantor is a volunteer (no benefit) and is in a relationship of trust
+      with the borrower, the lender is fixed with constructive notice unless it took
+      reasonable steps. Reasonable steps = explanation by lender or solicitor (NOT the
+      borrower's solicitor), recording of advice, no ambush at signing. Effect: guarantee
+      set aside as against guarantor.
+    effect: voidable_at_borrower_election
+    doctrine: garcia_volunteer_guarantee
+
+  - id: bunl-amadio-special-disadvantage
+    description: Amadio — unconscionable conduct where lender knew of borrower's special disadvantage.
+    citation:
+      act: Common law (HCA)
+      section: "Commercial Bank of Australia v Amadio (1983) 151 CLR 447"
+    severity: critical
+    triggerSignals:
+      - "Borrower has limited English / poor literacy"
+      - "Borrower elderly / unwell / under emotional duress"
+      - "No ILA recommended despite obvious complexity"
+      - "Documents signed in haste at lender's office"
+    detectionPrompt: >
+      Special disadvantage (sickness, age, infirmity, lack of education, language,
+      dependence, emotional state) of which the lender knew or ought to have known, and
+      took advantage. Effect: contract voidable; rescission, restitution, damages.
+    effect: voidable_at_borrower_election
+    doctrine: amadio_special_disadvantage
+
+  - id: bunl-ppsa-s267-unperfected-vesting
+    description: PPSA s 267 — unperfected security interest vests in administrator on insolvency.
+    citation:
+      act: Personal Property Securities Act 2009 (Cth)
+      section: "267"
+    severity: high
+    triggerSignals:
+      - "Security over personal property created"
+      - "No PPSR registration evidenced"
+      - "Charge predating PPSA migration without transitional preservation"
+    detectionPrompt: >
+      Where security over personal property is granted but the lender has not
+      registered (or fails to register before the next insolvency-equivalent event),
+      the security interest vests in the administrator / liquidator of the grantor.
+      Practical effect for borrower advice: if ever the grantor is deciding whether to
+      enter VA, knowing the lender's security is unperfected may be material.
+    effect: void
+    doctrine: ppsa_unperfected_vesting_s267
+
+  - id: bunl-common-law-penalty
+    description: Common law penalty doctrine — sums payable on default that are out of all proportion to lender's legitimate interest.
+    citation:
+      act: Common law (HCA)
+      section: "Paciocco v ANZ (2016) 258 CLR 525"
+    severity: medium
+    triggerSignals:
+      - "Default fees / break costs disproportionate to actual loss"
+      - "Default interest > 4-5% above standard rate without genuine pre-estimate"
+      - "Acceleration with full-term interest payable"
+    detectionPrompt: >
+      Apply Paciocco: a clause is penal only if it imposes a detriment out of all
+      proportion to any legitimate interest of the lender in performance. If so,
+      unenforceable to the extent of excess.
+    effect: unfair_term_and_voidable
+    doctrine: common_law_penalty

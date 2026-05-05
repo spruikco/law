@@ -1,0 +1,156 @@
+title: VIC LPUL Pt 4.3 billing compliance checklist
+rules:
+  - id: bl-s186-writing-and-signed
+    description: A bill of legal costs must be in writing and signed by an Australian legal practitioner of the law practice.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "186"
+    severity: critical
+    checkerPrompt: >
+      pass if signingSolicitorName is non-empty AND billNumber is non-empty.
+      fail if signingSolicitorName is missing or empty.
+      The composed document MUST contain a signature block — needs_review otherwise.
+
+  - id: bl-s174-disclosure-prerequisite
+    description: A practice must not seek to recover legal costs unless costs disclosure under s 174 was given (or the matter falls within s 174(4) sophisticated-client exception).
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "174 + 178"
+    severity: critical
+    checkerPrompt: >
+      pass if costsDisclosureGivenAt is set OR isSophisticatedClient is true.
+      fail otherwise — costs may be non-recoverable under s 178.
+
+  - id: bl-s180-costs-agreement
+    description: Existence of a written costs agreement governs the basis for charging.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "180"
+    severity: high
+    checkerPrompt: >
+      pass if costsAgreementOnFile is true. warning if false (charging falls back
+      to applicable fair-and-reasonable test under s 172 / scale of costs).
+
+  - id: bl-s182-uplift-cap
+    description: An uplift fee under a conditional costs agreement must not exceed 25%.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "182"
+    severity: critical
+    checkerPrompt: >
+      pass if isConditional is false.
+      pass if isConditional is true AND (upliftPercent is undefined OR upliftPercent <= 25).
+      fail if isConditional is true AND upliftPercent > 25.
+      warning if upliftAppliedToFees is true AND isConditional is false (uplift requires CCA).
+
+  - id: bl-s187-itemised-bill-notice
+    description: The bill must inform the client of the right to request an itemised bill within 30 days of receipt of a lump-sum bill.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "187"
+    severity: high
+    checkerPrompt: >
+      The composed document must contain a "client rights" notice referencing s 187
+      and the 30-day window. needs_review by default.
+      pass if billKind is "itemised_on_request" (already itemised).
+
+  - id: bl-s192-client-rights-notice
+    description: A bill must be accompanied by, or include, a notice of the client's rights — to receive an itemised bill, to seek costs assessment under Pt 5.4, and to apply to VLSB+C.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "192"
+    severity: high
+    checkerPrompt: >
+      The composed document must contain a "client rights" / "notice of rights" section
+      referencing itemised bill, costs assessment under Pt 5.4, and VLSB+C complaint.
+      needs_review by default.
+
+  - id: bl-s195-itemised-content
+    description: An itemised bill must show the work performed, by whom, when, the time charged, the rate, and the amount.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "195"
+    severity: high
+    checkerPrompt: >
+      Only applies if billKind is "itemised_on_request" or "memorandum_of_costs".
+      pass if every feeItem has date + feeEarner + description + units + rate + amount populated.
+      fail if any feeItem is missing date, feeEarner, description, or amount.
+      For other billKinds, return pass with explanation "itemisation not required for this kind".
+
+  - id: bl-s193-interest-disclosure
+    description: Interest may be charged on overdue legal costs only if the costs agreement provides for it AND the bill includes a statement that interest is or may be charged.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "193"
+    severity: high
+    checkerPrompt: >
+      If interestPercent is set and > 0, then interestClauseInAgreement must be true (else fail),
+      AND the document must include an interest notice (needs_review for the composer).
+      If interestPercent is unset / 0, pass (no interest claim).
+      If interestClauseInAgreement is true but interestPercent is unset, pass with explanation.
+
+  - id: bl-s193-interest-rate-cap
+    description: Interest rate must not exceed the prescribed rate (Penalty Interest Rates Act / LSC determined rate).
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "193(2)"
+    severity: medium
+    checkerPrompt: >
+      As a sanity check, fail if interestPercent > 12 (prescribed rate is currently
+      around RBA cash + 2%, well below 12%). warning if interestPercent > 8.
+      pass if interestPercent <= 8 or unset.
+
+  - id: bl-s172-fair-and-reasonable
+    description: Total legal costs must be fair and reasonable, and proportionate to the matter.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "172"
+    severity: high
+    checkerPrompt: >
+      Compute fees subtotal = sum(feeItems.amount). warning if any single feeItem.amount > 5000
+      (likely outsized line item — supervisor review warranted). warning if feesSubtotal > 50000
+      and matterDescription is short / advice-only sounding. needs_review otherwise.
+
+  - id: bl-trust-money-bill-before-withdrawal
+    description: A practice must give the client a bill (or itemised bill on request) before withdrawing trust money to pay legal costs.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "150 + 152"
+    severity: critical
+    checkerPrompt: >
+      If willWithdrawFromTrust is true, the composed document must contain a "trust application"
+      section (s 150 / s 152). needs_review by default.
+      If willWithdrawFromTrust is false, pass.
+
+  - id: bl-gst-tax-invoice-form
+    description: Tax invoice must include "Tax Invoice" wording, supplier name + ABN, recipient identity (if total >= $1,000), date, supply description, and the GST amount or that the price includes GST.
+    citation:
+      act: A New Tax System (Goods and Services Tax) Act 1999 (Cth)
+      section: "29-70"
+    severity: high
+    checkerPrompt: >
+      pass if practice.abn matches /^\d{2}\s?\d{3}\s?\d{3}\s?\d{3}$/ (11 digits) AND
+      issuedOn is set. fail if practice.abn is empty or not 11 digits.
+      The composed tax-invoice section must label itself "Tax Invoice" and show
+      ABN + GST amount — needs_review by default.
+
+  - id: bl-bill-period-coherence
+    description: The bill period (periodStart..periodEnd) must encompass all line-item and disbursement dates.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "186"
+    severity: medium
+    checkerPrompt: >
+      pass if every feeItem.date and every disbursement.date falls within
+      [periodStart, periodEnd]. warning otherwise. pass if no items/disbursements.
+
+  - id: bl-conditional-no-uplift-on-disb
+    description: Uplift under a conditional costs agreement applies only to professional fees, not to disbursements.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "182"
+    severity: high
+    checkerPrompt: >
+      Sanity rule. pass by default. warning if isConditional and upliftAppliedToFees and
+      any disbursement.amount appears to include an uplift line item (look for "uplift"
+      in description). needs_review for composer to confirm uplift was applied to fees only.

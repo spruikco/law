@@ -1,0 +1,215 @@
+title: Bank documents — mandatory statutory checks (NCC + ACL + Code of Banking Practice)
+# Used by Pass 3 statutory compliance. One pass/fail/warning/needs_review per
+# rule. Citations land verbatim in the letter.
+rules:
+  # ---------------- National Credit Code (consumer credit only) ----------------
+  - id: ncc-s5-applies
+    description: National Credit Code applies — debtor is a natural person or strata corp, predominantly personal/domestic/household purpose, charge for credit imposed.
+    citation:
+      act: National Credit Code (Sch 1 NCCP Act 2009 (Cth))
+      section: "5"
+      url: https://www8.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/nccpa2009377/sch1.html
+    severity: critical
+    checkerPrompt: >
+      Check whether the loan is consumer credit under NCC s 5: (a) debtor is natural person
+      or strata corp, (b) credit is provided wholly or predominantly for personal /
+      domestic / household purposes (or to purchase, renovate or improve residential
+      property for investment purposes — s 5(1)(b)(ii)), (c) a charge is or may be made for
+      providing the credit, (d) credit provider provides the credit in the course of a
+      business of providing credit. Also rule out s 6 exclusions (small business, short
+      term ≤ 62 days, employer credit etc.). Pass = NCC applies and the docs treat it as
+      such; fail = NCC applies but docs deny it; warning = ambiguous predominant purpose.
+
+  - id: ncc-s14-form-of-contract
+    description: The credit contract is in writing, signed by debtor (or evidenced in writing) per NCC s 14.
+    citation:
+      act: National Credit Code
+      section: "14"
+    severity: high
+    checkerPrompt: >
+      Check whether the loan agreement satisfies s 14: written, signed by the debtor or
+      evidenced by a written document the credit provider provides the debtor.
+
+  - id: ncc-s17-required-disclosures
+    description: Credit contract discloses everything required by NCC s 17 — APR, amount of credit, term, repayments, fees, default rates.
+    citation:
+      act: National Credit Code
+      section: "17"
+    severity: high
+    checkerPrompt: >
+      Check the docs for the s 17 minimum content: (a) APR, (b) total amount of interest
+      charges if known or method of calculation, (c) credit fees and charges, (d)
+      repayments — amount, number, frequency, (e) default rate, (f) statement that the
+      debtor may obtain the form of acknowledgment under s 16, (g) variation rights,
+      (h) statement of account requirements. Map findings to the nccChecklist extraction.
+
+  - id: ncc-s39-default-interest
+    description: Default interest charged on the unpaid amount only, not on the entire balance, per NCC s 39.
+    citation:
+      act: National Credit Code
+      section: "39"
+    severity: high
+    checkerPrompt: >
+      Default interest can only be charged on the part of the amount in default — not on
+      the whole balance. Flag any clause that imposes default interest on the entire
+      facility from the date of default.
+
+  - id: ncc-s72-hardship-notice
+    description: Borrower has the right to give a hardship notice and seek variation under NCC s 72.
+    citation:
+      act: National Credit Code
+      section: "72"
+    severity: medium
+    checkerPrompt: >
+      Check that the documents acknowledge the borrower's right to a hardship variation —
+      either by direct reference, by reference to the Banking Code, or by silence (which
+      is fine — the right exists in any event). Fail only if the contract purports to
+      contract out.
+
+  - id: ncc-s88-default-notice
+    description: Lender must give a default notice (≥ 30 days) before enforcement under NCC s 88.
+    citation:
+      act: National Credit Code
+      section: "88"
+    severity: critical
+    checkerPrompt: >
+      Lenders must serve a written notice giving the debtor at least 30 days to remedy a
+      default before commencing enforcement. Check whether the docs acknowledge s 88 (it
+      applies regardless), and whether the documents purport to override the 30-day cure
+      period — that override is unenforceable for NCC contracts.
+
+  # ---------------- Australian Consumer Law ----------------
+  - id: acl-s18-misleading
+    description: ACL s 18 — misleading or deceptive conduct in trade or commerce.
+    citation:
+      act: Australian Consumer Law (Sch 2 CCA 2010 (Cth))
+      section: "18"
+    severity: medium
+    checkerPrompt: >
+      Identify any representations in the offer letter / loan agreement / brochure that
+      are absolute, comparative, or quantitative and may be misleading (e.g. "low rate
+      guaranteed", "no fees" while fees are buried elsewhere, "approval certain"). Flag
+      for solicitor review.
+
+  - id: acl-uct-pt2-3
+    description: ACL Part 2-3 unfair contract terms — applies to consumer + small business standard-form contracts.
+    citation:
+      act: Australian Consumer Law
+      section: "23–28"
+    severity: high
+    checkerPrompt: >
+      Determine whether the documents are standard-form (s 27 indicia) and whether the
+      borrower / guarantor is a consumer or small business (s 23(2): contract value ≤
+      cap; ≤ 100 employees / annual turnover ≤ $10m). If both, every borrower-adverse
+      clause is potentially testable as unfair under s 24. Flag candidate clauses (broad
+      indemnities, unilateral variation, all-monies set-off, single-sided default, deemed
+      service shortcuts, price increase rights). Status = warning by default; fail only
+      if clauses are clearly unfair on s 24 + s 25.
+
+  - id: acl-s20-unconscionable
+    description: ACL s 20 — unconscionable conduct within unwritten law.
+    citation:
+      act: Australian Consumer Law
+      section: "20"
+    severity: high
+    checkerPrompt: >
+      Look for indicia of unconscionable conduct under the unwritten law (Amadio /
+      Garcia / Kakavas): special disadvantage, lender knowledge, lender exploitation.
+      Flag where guarantor is a non-English-speaking spouse / elderly relative with no
+      benefit and no ILA, or there are signs of urgency / pressure.
+
+  - id: acl-s21-unconscionable-business
+    description: ACL s 21 — unconscionable conduct in connection with the supply of goods or services to a person (statutory).
+    citation:
+      act: Australian Consumer Law
+      section: "21"
+    severity: high
+    checkerPrompt: >
+      Apply the s 22 factors to small-business borrowers: relative bargaining strengths,
+      compliance with industry codes, whether terms are reasonably necessary to protect
+      lender interests, conduct in good faith. Flag candidates such as one-sided
+      acceleration, broad lender discretions, refusal to provide reasons.
+
+  # ---------------- Code of Banking Practice 2025 ----------------
+  - id: cbp-cl19-fairness-and-ethics
+    description: Code of Banking Practice cl 19 — fair, reasonable and ethical conduct.
+    citation:
+      act: Banking Code of Practice 2025 (ABA)
+      section: "19"
+    severity: medium
+    checkerPrompt: >
+      Check whether the lender appears bound by the Banking Code (most ABA member banks).
+      Flag any document terms inconsistent with cl 19 (fair, reasonable, ethical conduct)
+      — e.g. uncapped lender discretions with no good-faith qualifier, retroactive fee
+      changes.
+
+  - id: cbp-cl31-guarantor-protections
+    description: Code of Banking Practice cl 31 — guarantor must receive prominent warnings, financial information about borrower, and time to consider.
+    citation:
+      act: Banking Code of Practice 2025 (ABA)
+      section: "31"
+    severity: high
+    checkerPrompt: >
+      Where guarantee.present is true, check (a) prominent warning on first page that
+      guarantor is liable; (b) statement of account / financial info disclosed to
+      guarantor; (c) at least one full day between guarantor receiving documents and
+      signing; (d) recommendation to obtain independent legal and financial advice.
+      Tie to guarantee.codeOfBankingPracticeIssues.
+
+  - id: cbp-cl37-financial-difficulty
+    description: Code of Banking Practice cl 37 — co-operative and constructive engagement with customers in financial difficulty.
+    citation:
+      act: Banking Code of Practice 2025 (ABA)
+      section: "37"
+    severity: medium
+    checkerPrompt: >
+      Check that the documents do not purport to override or restrict the borrower's
+      right to invoke the Code's financial-difficulty regime — overlapping with NCC s 72
+      hardship for consumer credit.
+
+  # ---------------- PPSA ----------------
+  - id: ppsa-s12-security-interest
+    description: PPSA s 12 — security interest definition; substance over form.
+    citation:
+      act: Personal Property Securities Act 2009 (Cth)
+      section: "12"
+    severity: medium
+    checkerPrompt: >
+      For any GSA / SSA / charge: classify the security under s 12 (in-substance test).
+      Confirm collateral classes are correctly described (AAPP, circulating, specific
+      personal property). Flag if the document calls itself a charge or mortgage but
+      operates as a PPSA security interest without registration contemplated.
+
+  - id: ppsa-s267-unperfected-vesting
+    description: PPSA s 267 — unperfected security interests vest in administrator / liquidator on insolvency.
+    citation:
+      act: Personal Property Securities Act 2009 (Cth)
+      section: "267"
+    severity: high
+    checkerPrompt: >
+      Where security is granted over personal property, check that registration on the
+      PPSR is contemplated (or already complete). If not, flag the s 267 vesting risk
+      should the grantor enter external administration before perfection.
+
+  # ---------------- VIC overlay (TLA, PLA) ----------------
+  - id: tla-s74-mortgage-form
+    description: Real-property mortgage in registrable form per TLA 1958 (Vic) ss 74–78.
+    citation:
+      act: Transfer of Land Act 1958 (Vic)
+      section: "74"
+    severity: medium
+    checkerPrompt: >
+      For a registered mortgage of Torrens land in Victoria, check the document is in the
+      approved form, is to be registered, and identifies the land with a volume / folio
+      reference.
+
+  - id: pla-s132-relief-against-acceleration
+    description: Property Law Act 1958 (Vic) s 132 — equitable relief from forfeiture / penalty.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "132"
+    severity: low
+    checkerPrompt: >
+      Check whether default-acceleration / penalty-style clauses are likely to be
+      relievable under s 132 / general equity. Note for the letter — does not invalidate
+      but informs negotiation.

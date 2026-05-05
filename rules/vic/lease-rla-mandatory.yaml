@@ -1,0 +1,142 @@
+title: Retail Leases Act 2003 (Vic) mandatory protections — retail leases only
+# Each rule is checked by pass 3 of the lease pipeline ONLY if the lease
+# was classified as retail under s4 RLA 2003. Lawyer review these carefully
+# against actual RLA text before relying on findings.
+rules:
+  - id: rla-disclosure-statement
+    description: Landlord must give a disclosure statement at least 7 days before the lease is entered into.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "17"
+    severity: high
+    checkerPrompt: >
+      Look for any reference in the lease/items to a disclosure statement having been
+      provided, when it was provided, and whether the tenant acknowledged receipt.
+      If the lease is silent on this, mark needs_review and recommend the solicitor
+      confirm receipt before execution. If there is clear evidence the statement was
+      given less than 7 days before signing, mark fail.
+
+  - id: rla-cannot-contract-out
+    description: Parties cannot contract out of the RLA; clauses purporting to do so are void.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "94"
+    severity: critical
+    checkerPrompt: >
+      Look at the extracted additionalProvisions for any clause flagged rlaConflict=true.
+      If any are present, fail with a list of each clause and the RLA section it conflicts
+      with. If none flagged, pass.
+
+  - id: rla-rent-review-method-prohibition
+    description: Rent reviews cannot combine methods (e.g. "greater of CPI or market") during a single review.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "35"
+    severity: high
+    checkerPrompt: >
+      Check extraction.items.rentReview.method and description. If the review uses a
+      "greater_of" or combined method (e.g. greater of CPI, market and fixed percent) at
+      a single review date, fail — s35 prohibits this for retail leases. If a ratchet is
+      present (ratchetPresent=true), warning — ratchets are generally void for retail rent
+      reviews to market (s35(2)). Otherwise pass.
+
+  - id: rla-outgoings-recoverable
+    description: Only specific outgoings are recoverable from a retail tenant; landlord's capital costs are NOT recoverable.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "39"
+    severity: high
+    checkerPrompt: >
+      Check extraction.outgoings.items and excessiveItems. If any non-standard item
+      (especially landlord's capital costs, sinking-fund contributions for capital works,
+      land tax on a single-holding basis, depreciation, financing costs) is recoverable,
+      fail. Otherwise pass.
+
+  - id: rla-estimate-of-outgoings
+    description: Landlord must provide a written estimate of outgoings before each accounting period.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "46"
+    severity: medium
+    checkerPrompt: >
+      Review the outgoings clauses in the lease. If the lease does not require the landlord
+      to provide an annual written estimate + audited statement of outgoings, flag warning
+      with a note that s46 RLA imposes this obligation regardless.
+
+  - id: rla-relocation-rights
+    description: If lease contains a relocation clause, it must comply with s46A of the RLA — six months notice + compensation.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "46A"
+    severity: high
+    checkerPrompt: >
+      Search additionalProvisions for a relocation clause (focusArea=relocation_demolition
+      and "relocate" in text). If present, check it provides at least 6 months notice and
+      covers the tenant's reasonable relocation costs. If non-compliant or absent, fail.
+      If no relocation clause exists at all, pass.
+
+  - id: rla-demolition-rights
+    description: Demolition clauses must give at least six months notice and compensate the tenant for fit-out.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "56"
+    severity: high
+    checkerPrompt: >
+      Search additionalProvisions for a demolition clause. If present, check notice period
+      (≥6 months) and compensation for fit-out. Fail if non-compliant; pass if no demolition
+      clause.
+
+  - id: rla-no-key-money
+    description: Landlord must not seek key money or other consideration for entering the lease (other than rent + outgoings + bond + fit-out consideration if the landlord funds it).
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "23"
+    severity: high
+    checkerPrompt: >
+      Check the items + additionalProvisions for any payment labelled "key money", "premium",
+      "goodwill payment", "lease preparation fee" (beyond reasonable legal costs) payable by
+      tenant TO landlord at the start of the lease. If found, fail.
+
+  - id: rla-legal-costs
+    description: Landlord cannot recover its lease preparation/negotiation legal costs from the tenant.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "51"
+    severity: high
+    checkerPrompt: >
+      Search additionalProvisions for any clause making the tenant liable for the landlord's
+      legal costs of preparing or negotiating the lease (beyond reasonable stamping/registration
+      costs). If present, fail — s51 renders this unrecoverable against retail tenants.
+
+  - id: rla-option-exercise-notice
+    description: Landlord must notify tenant of the last day to exercise an option at least 6–12 months before that date.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "28"
+    severity: medium
+    checkerPrompt: >
+      Check items.optionTerms and any option-exercise clauses in additionalProvisions. If there
+      is an option, flag warning reminding the solicitor of s28 notification obligations;
+      if the clause purports to remove this obligation, fail.
+
+  - id: rla-no-repair-capital-nature
+    description: Tenant cannot be required to pay for repairs of a capital nature.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "52"
+    severity: high
+    checkerPrompt: >
+      Review the repair/maintenance clauses and make-good clauses. If the tenant is required to
+      carry out or pay for repairs of a capital nature (structural repairs, replacement of plant
+      with finite useful life), fail.
+
+  - id: rla-security-bond-limit
+    description: Security bond / bank guarantee is limited to an amount commensurate with the lease.
+    citation:
+      act: Retail Leases Act 2003 (Vic)
+      section: "24"
+    severity: medium
+    checkerPrompt: >
+      Compare items.bankGuarantee.amount against items.commencingRent.amount (annual).
+      Commercial norm is 3-6 months equivalent. If the bank guarantee exceeds 12 months of
+      rent, warning — flag for negotiation.

@@ -1,0 +1,296 @@
+title: RLA 2003 (Vic) — landlord non-compliance that voids tenant payment obligations (PRJ-693 capability 5)
+# This rule pack is the differentiator. Each rule maps a *specific* RLA 2003
+# trigger that voids a lease term or removes the tenant's liability to pay.
+# Output schema: UnenforceabilityFinding (see packages/schema/src/lease.ts).
+# Pipeline pass: 3b (after 3a mandatory protections), retail leases only.
+#
+# Phasing:
+#   phase: 1 — bright-line voids detectable from lease text alone.
+#   phase: 2 — require facts from the tenant client (was disclosure given? was estimate given?).
+#   phase: 3 — interpretive; lawyer-confirm by default.
+rules:
+  # ===== Phase 1 — bright-line voids =====
+  - id: RLA-s23-key-money
+    phase: 1
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "23(2)"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-23
+    landlordFailure: >-
+      Lease purports to require the tenant to pay key-money or consideration for
+      goodwill in connection with the grant, renewal, variation or assignment
+      of the lease.
+    effect: void
+    severity: high
+    detectInstructions: >-
+      Search the lease text and items for any payment labelled "key money",
+      "premium", "goodwill payment", "consideration for entering the lease",
+      payable by the tenant TO the landlord. EXCLUDE rent in advance, security
+      deposit / bond / bank guarantee, plant-and-equipment sale price under
+      s23(3)(f), and reasonable assignment-investigation costs (s23(3)(a)).
+      Match → fail. No match → pass.
+    remedyTemplate: >-
+      The clause is void under s23(2). Any payment already made by the tenant
+      may be recovered from the landlord as a debt (s23(4)). The clause should
+      be deleted in any negotiated lease, or amended to fall within an s23(3)
+      exemption.
+    needsLawyerConfirm: false
+
+  - id: RLA-s41-capital-costs
+    phase: 1
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "41(1)"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-41
+    landlordFailure: >-
+      Lease purports to require the tenant to contribute to the landlord's
+      capital costs of the building, the centre, plant in the building, or
+      associated areas.
+    effect: void
+    severity: high
+    detectInstructions: >-
+      Examine outgoings.items, outgoings.excessiveItems and any clause text
+      requiring the tenant to "pay", "contribute" or "reimburse" the landlord
+      for capital costs / capital expenditure / capital works / replacement of
+      plant / structural works. EXCLUDE the s41(2) carve-outs — tenant
+      undertaking its OWN capital works at its own cost, and ESM repair /
+      maintenance contributions. Match → fail.
+    remedyTemplate: >-
+      The clause is void under s41(1) to the extent it requires capital-cost
+      contribution. Each item should be checked against the s41(2) carve-outs.
+      Recommend the outgoings clause expressly exclude capital costs and
+      replacement of plant.
+    needsLawyerConfirm: true
+
+  - id: RLA-s50-land-tax-pass-through
+    phase: 1
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "50(1)"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-50
+    landlordFailure: >-
+      Lease purports to make the tenant liable to pay an amount for land tax
+      (Land Tax Act 2005) or commercial and industrial property tax (C&I
+      Property Tax Reform Act 2024) for which the landlord (or head landlord)
+      is the taxpayer.
+    effect: void
+    severity: critical
+    detectInstructions: >-
+      Search items.outgoingsDescription, outgoings.items, outgoings.excessiveItems
+      and any clause for "land tax", "C&I property tax", "commercial and
+      industrial property tax" payable by, recoverable from, or contributable
+      by the tenant. Match → fail.
+    remedyTemplate: >-
+      The provision is void under s50(1). Any amounts paid by the tenant for
+      land tax or C&I property tax in respect of any period after 1 July 2003
+      are recoverable. Recommend the outgoings clause be amended to expressly
+      exclude any tax for which the landlord is the taxpayer.
+    needsLawyerConfirm: false
+
+  - id: RLA-s51-landlord-legal-costs
+    phase: 1
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "51(1)"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-51
+    landlordFailure: >-
+      Lease purports to recover from the tenant the landlord's legal or other
+      expenses of negotiating, preparing or executing the lease, obtaining
+      mortgagee consent, or complying with the RLA 2003.
+    effect: void
+    severity: high
+    detectInstructions: >-
+      Examine additionalProvisions and outgoings for any clause making the
+      tenant liable for the landlord's legal costs of preparation, negotiation
+      or execution of the lease, mortgagee consent costs, or RLA-compliance
+      costs. EXCLUDE the s51(2) carve-out for reasonable costs of an actual
+      assignment or sub-lease (including investigation of an assignee). Match
+      → fail.
+    remedyTemplate: >-
+      Costs of negotiating, preparing and executing the lease are not
+      recoverable from the tenant under s51(1). Recommend deletion or
+      narrowing to the s51(2) carve-out (reasonable assignment / sub-lease
+      costs only).
+    needsLawyerConfirm: false
+
+  # ===== Phase 2 — need tenant-supplied facts =====
+  - id: RLA-s17-disclosure-statement
+    phase: 2
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "17"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-17
+    landlordFailure: >-
+      Landlord did not give a disclosure statement and proposed lease at least
+      14 days before the lease was entered into, OR the disclosure given was
+      misleading, false or materially incomplete.
+    effect: not_liable_until_remedied
+    severity: critical
+    detectInstructions: >-
+      Look for any reference to a disclosure statement having been provided
+      and the tenant's acknowledgement of receipt, plus the date. If silent or
+      ambiguous, mark needs_review and ask the tenant client to confirm date
+      of receipt vs date of signing. If clearly less than 14 days, fail.
+    remedyTemplate: >-
+      Under s17(3) the tenant may withhold rent from the date of giving notice
+      until the disclosure statement is given. If the disclosure given was
+      misleading / incomplete, s17(5)–(6) gives the tenant a 28-day right of
+      termination. Recommend obtaining the disclosure statement on file and
+      the tenant's record of receipt before settlement.
+    needsLawyerConfirm: true
+
+  - id: RLA-s35-rent-review-method
+    phase: 2
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "35"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-35
+    landlordFailure: >-
+      Rent review provision (a) does not specify how the review is to be made
+      (s35(6)), or (b) purports to prevent rent reduction on a market or index
+      review (s35(3)).
+    effect: void
+    severity: high
+    detectInstructions: >-
+      Examine items.rentReview. If method is "market" or based on an index AND
+      ratchetPresent === true, fail (s35(3)–(4)). If review provision does not
+      state when reviews occur or how they are calculated, fail (s35(6)). If
+      method is "greater_of" combining methods at a single review, fail.
+    remedyTemplate: >-
+      The provision is void to that extent. Under s35(7) the rent on review
+      becomes the amount agreed between the parties or, failing agreement, the
+      current market rent determined by an SBC-appointed specialist retail
+      valuer (cost split equally). Recommend the review clause be amended to
+      remove the ratchet / combined method / specify the review timing.
+    needsLawyerConfirm: false
+
+  - id: RLA-s46-no-outgoings-estimate
+    phase: 2
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "46(4)"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-46
+    landlordFailure: >-
+      Landlord did not give the tenant a written, itemised estimate of
+      outgoings before the lease was entered into and at least one month
+      before each accounting period.
+    effect: not_liable_until_remedied
+    severity: high
+    detectInstructions: >-
+      If outgoings.payable === true, mark needs_review and ask the tenant
+      client whether (i) an estimate was given before signing and (ii) an
+      annual estimate has been given for each accounting period. Track the
+      most recent estimate date if known.
+    remedyTemplate: >-
+      Under s46(4) the tenant is not liable to contribute to outgoings of
+      which an estimate is required and has not been given. Recommend
+      auditing the file for the original estimate and each annual estimate;
+      any outgoings paid in respect of a period for which no compliant
+      estimate was given are recoverable.
+    needsLawyerConfirm: true
+
+  - id: RLA-s47-annual-statement
+    phase: 2
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "47"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-47
+    landlordFailure: >-
+      Landlord did not give the tenant an annual statement of outgoings
+      (audited where required by s48) within 3 months of the end of the
+      accounting period.
+    effect: right_to_withhold
+    severity: medium
+    detectInstructions: >-
+      If outgoings.payable === true, mark needs_review and ask the tenant
+      client whether annual outgoings statements have been provided.
+    remedyTemplate: >-
+      The tenant may withhold contributions to outgoings until a compliant
+      statement is provided. Recommend a written request under s47.
+    needsLawyerConfirm: true
+
+  # ===== Phase 3 — interpretive; lawyer-confirm by default =====
+  - id: RLA-s40-non-specific-outgoings
+    phase: 3
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "40"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-40
+    landlordFailure: >-
+      In a retail shopping centre, the tenant is required to contribute to
+      outgoings that benefit specific premises in the centre that the tenant's
+      premises do not benefit from.
+    effect: not_liable_until_remedied
+    severity: medium
+    detectInstructions: >-
+      Examine the apportionment basis for outgoings in the lease. If the
+      premises are in a shopping centre AND the apportionment includes
+      benefits to other specific premises (e.g. a food court fund the
+      tenant's office space cannot benefit from), needs_review.
+    remedyTemplate: >-
+      The tenant is not liable to contribute beyond an amount calculated as
+      prescribed by the regulations (s40(2)). Recommend re-apportionment.
+    needsLawyerConfirm: true
+
+  - id: RLA-s52-urgent-repairs
+    phase: 3
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "52"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-52
+    landlordFailure: >-
+      Lease purports to make the tenant responsible for structural repairs
+      or repairs of fixtures provided by the landlord that the landlord is
+      taken to have agreed under s52(2).
+    effect: void
+    severity: medium
+    detectInstructions: >-
+      Examine the repair/maintenance and make-good clauses. If the tenant is
+      required to carry out or pay for repairs of a capital nature
+      (structural repairs, replacement of plant with finite useful life),
+      needs_review.
+    remedyTemplate: >-
+      Under s52(2) the landlord is responsible for these repairs. The clause
+      is void to that extent. Recommend amending repair allocation.
+    needsLawyerConfirm: true
+
+  - id: RLA-s56-demolition-notice
+    phase: 3
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "56"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-56
+    landlordFailure: >-
+      Demolition termination clause does not require at least 6 months'
+      written notice with details of a genuine demolition proposal.
+    effect: void
+    severity: high
+    detectInstructions: >-
+      Search additionalProvisions for a demolition termination clause. If
+      present, check notice period (≥6 months) and the requirement for
+      details of the proposed demolition. If non-compliant, fail.
+    remedyTemplate: >-
+      The clause is void to the extent it allows termination on shorter
+      notice or without genuine details. Recommend redrafting to mirror s56
+      requirements.
+    needsLawyerConfirm: false
+
+  - id: RLA-s94-contracting-out
+    phase: 3
+    trigger:
+      act: Retail Leases Act 2003 (Vic)
+      section: "94"
+      url: https://www.legislation.vic.gov.au/in-force/acts/retail-leases-act-2003/044#section-94
+    landlordFailure: >-
+      Lease contains a clause purporting to exclude or limit the application
+      of the RLA 2003 (catch-all).
+    effect: void
+    severity: high
+    detectInstructions: >-
+      Search additionalProvisions for any clause flagged rlaConflict === true,
+      or text purporting to "exclude", "modify", "vary" or "contract out of"
+      the RLA. If any present, fail with a list of each clause.
+    remedyTemplate: >-
+      Each such clause is void to the extent of the inconsistency under s94.
+      Recommend deletion of each contracting-out provision.
+    needsLawyerConfirm: false

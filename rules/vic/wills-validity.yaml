@@ -1,0 +1,144 @@
+title: VIC Wills — formal validity rules under Wills Act 1997 (Vic)
+rules:
+  - id: wills-s7-execution-formalities
+    description: A will must be in writing, signed by the testator (or by another person at their direction in their presence), with the signature made or acknowledged in the presence of two or more witnesses present at the same time, who each then sign the will in the testator's presence.
+    citation:
+      act: Wills Act 1997 (Vic)
+      section: "7"
+      url: https://www.legislation.vic.gov.au/in-force/acts/wills-act-1997/032
+    severity: critical
+    checkerPrompt: >
+      Verify the will satisfies s 7: in writing; signed by testator (or by direction in
+      testator's presence); two witnesses present at the same time when testator signs or
+      acknowledges; each witness signs in testator's presence. pass if all elements visible
+      in attestation clause. fail if execution lacks two witnesses, or signatures not in
+      same temporal/spatial order. needs_review if the document is presented as informal
+      (no formal attestation clause).
+
+  - id: wills-s8a-knowledge-and-approval
+    description: The testator must know and approve the contents of the will at the time of execution.
+    citation:
+      act: Wills Act 1997 (Vic)
+      section: "8A"
+    severity: high
+    checkerPrompt: >
+      Decide whether anything in the document or extraction raises a knowledge-and-approval
+      doubt — e.g. blind/illiterate testator without an attestation that the will was read
+      over and explained, or a will prepared by a substantial beneficiary. pass if no
+      indicator. needs_review if a major beneficiary appears to have prepared / arranged the
+      will (Wintle v Nye). fail only if the document expressly contradicts knowledge and
+      approval.
+
+  - id: wills-s5-testamentary-capacity
+    description: The testator must have testamentary capacity — i.e. understand the nature of the act, the extent of property, the claims to which they ought to give effect, and have a sound disposing mind (Banks v Goodfellow).
+    citation:
+      act: Wills Act 1997 (Vic)
+      section: "5"
+    severity: critical
+    checkerPrompt: >
+      Decide whether the document raises capacity doubt. pass if no indicator. needs_review
+      if testator is elderly + recent dementia diagnosis hint OR the will is markedly different
+      from any prior will pattern. fail only if a contemporaneous medical opinion records
+      incapacity at execution.
+
+  - id: wills-s13-interested-witness
+    description: A beneficial disposition to a witness (or their spouse) is void unless saved by exceptions in s 13(2)-(4).
+    citation:
+      act: Wills Act 1997 (Vic)
+      section: "13"
+    severity: high
+    checkerPrompt: >
+      Cross-reference each witness's name (and spouse) against beneficiaries. pass if no
+      overlap. fail if a witness OR their spouse is named as beneficiary AND none of the s 13
+      saving provisions are evidently satisfied (would still have been admitted to probate
+      had they not witnessed; or sufficient witnesses without them; or all interested
+      beneficiaries consent).
+
+  - id: wills-s9-informal-execution
+    description: A document not executed per s 7 may still be admitted as a will if the Court is satisfied that the deceased intended it to be their will (s 9 dispensing power).
+    citation:
+      act: Wills Act 1997 (Vic)
+      section: "9"
+    severity: medium
+    checkerPrompt: >
+      If the document does not satisfy s 7 (informal / unsigned / single-witness), assess
+      whether s 9 is in play. status = needs_review if s 9 is plausibly available and an
+      application to the Supreme Court will be required. pass if the will is formally
+      executed under s 7. fail if the document is plainly not testamentary (e.g. a
+      letter to a friend with no dispositive intention).
+
+  - id: wills-residue-clause
+    description: The will should contain a residue clause to avoid partial intestacy (AP Act 1958 (Vic) Pt I governs partial intestacy distribution).
+    citation:
+      act: Wills Act 1997 (Vic)
+      section: residuary
+    severity: medium
+    checkerPrompt: >
+      pass if extraction.hasResidueClause is true. warning if missing — flag the partial
+      intestacy risk and that the residue would devolve under AP Act 1958 (Vic) ss 51-52.
+
+  - id: wills-executor-appointment
+    description: A will should appoint at least one executor, willing and eligible to act, with at least one alternate.
+    citation:
+      act: Administration and Probate Act 1958 (Vic)
+      section: "5"
+    severity: medium
+    checkerPrompt: >
+      pass if at least one executor + one alternate (or co-executors). warning if only one
+      executor with no alternate. fail if no executor appointed (then administration with
+      will annexed required).
+
+  - id: wills-beneficiary-clarity
+    description: Each gift must identify the beneficiary and the property with sufficient certainty (no patent or latent ambiguity).
+    citation:
+      act: Wills Act 1997 (Vic)
+      section: "31-36"
+    severity: medium
+    checkerPrompt: >
+      For each beneficiary in extraction, decide whether the description is clear enough to
+      identify them and the gift. warning where the description is ambiguous (e.g.
+      "my friend John") or refers to a class without a clear ascertainment date. needs_review
+      if ademption risk is flagged on a specific gift.
+
+  - id: wills-revocation-clause
+    description: A will should contain an express revocation of all prior wills and codicils.
+    citation:
+      act: Wills Act 1997 (Vic)
+      section: "12"
+    severity: low
+    checkerPrompt: >
+      pass if extraction.revocationClause is present. warning if absent — note the risk of
+      republication of an earlier will or partial inconsistency.
+
+  - id: wills-binding-death-benefit
+    description: Superannuation death benefits do not pass through the will unless the trust deed permits and a binding nomination directs payment to the estate.
+    citation:
+      act: Superannuation Industry (Supervision) Act 1993 (Cth)
+      section: "59"
+    severity: medium
+    checkerPrompt: >
+      If extraction.superFundsReferenced is non-empty OR bindingDeathBenefitNominations is
+      non-empty, status=needs_review and recommend the testator confirm BDBNs are current
+      and that any super-via-estate path is explicit. If neither is present but the estate
+      is likely to include super, warning. otherwise pass.
+
+  - id: wills-mutual-wills
+    description: Mutual wills create equitable obligations on the survivor not to revoke; identify any mutual-wills indicators.
+    citation:
+      act: equity
+      section: mutual wills doctrine
+    severity: medium
+    checkerPrompt: >
+      pass if no mutual-wills language. needs_review if classification.kind is mutual_will
+      or if extraction.observations contains any reference to "agreement not to revoke",
+      "mutual will", or reciprocal will language.
+
+  - id: wills-international-element
+    description: Cross-border assets / non-domiciliary testator triggers conflict-of-laws and possibly the International Wills regime (Wills Act Pt 2A).
+    citation:
+      act: Wills Act 1997 (Vic)
+      section: "Pt 2A"
+    severity: medium
+    checkerPrompt: >
+      pass if no international element. needs_review if classification.hasInternationalElement
+      is true OR observations reference foreign assets / foreign domicile.

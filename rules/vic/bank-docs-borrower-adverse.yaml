@@ -1,0 +1,247 @@
+title: Borrower-adverse clause patterns — bank documents
+# Surfaced to Pass 4 (Opus clause analysis). The model matches each clause
+# against this catalogue, applies severity, and proposes a polite-but-firm
+# borrower-protective amendment.
+rules:
+  # --- ALL-MONIES / CROSS-COLLATERALISATION ---
+  - id: bd-all-monies
+    description: All-monies clause — security secures every present and future debt of the borrower (and often related entities) to the lender.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: high
+    checkerPrompt: >
+      Look for the words "all monies", "any debt now or in the future", or "any liability
+      of the grantor or any related entity to the lender". Propose amendment: limit to
+      the specific facility, remove the after-acquired liability hook, exclude related
+      entities.
+
+  - id: bd-cross-collateralisation
+    description: Cross-collateralisation — single property securing multiple unrelated facilities of borrower or related parties.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: high
+    checkerPrompt: >
+      Look for clauses making one property security for borrowings other than the named
+      facility — particularly for separate purchases or business borrowings. Propose
+      amendment: each property secures only the facility for which it was provided as
+      security.
+
+  # --- CROSS-DEFAULT ---
+  - id: bd-cross-default
+    description: Cross-default — default on any other facility (of borrower or related entities) triggers default on this facility.
+    citation:
+      act: Australian Consumer Law
+      section: "23–28"
+    severity: high
+    checkerPrompt: >
+      Look for any provision that makes default on a separate facility, or by a related
+      entity, an event of default for this facility. Strong UCT candidate for small-
+      business borrowers. Propose amendment: cross-default only with respect to other
+      facilities of THIS borrower with THIS lender, with a materiality threshold and
+      30-day cure period.
+
+  # --- SET-OFF / COMBINATION ---
+  - id: bd-set-off-combination
+    description: Lender right to set off / combine borrower's deposit accounts against the loan without notice.
+    citation:
+      act: Australian Consumer Law
+      section: "24"
+    severity: medium
+    checkerPrompt: >
+      Look for clauses entitling the lender to combine accounts or apply credit balances
+      to debt without notice. Flag as UCT candidate. Propose amendment: 7-day notice
+      before set-off; carve-out for accounts holding third-party trust money.
+
+  - id: bd-no-set-off-by-borrower
+    description: Borrower waives all set-off / counterclaim / deduction rights — must pay in full notwithstanding any dispute.
+    citation:
+      act: Australian Consumer Law
+      section: "24"
+    severity: high
+    checkerPrompt: >
+      Asymmetric: lender can set off but borrower cannot. Strong UCT candidate. Propose
+      amendment: borrower may set off liquidated amounts owed by lender; otherwise, pay
+      and pursue.
+
+  # --- DEFAULT INTEREST / ACCELERATION ---
+  - id: bd-default-interest-uplift
+    description: Default interest at a rate disproportionate to actual loss — penalty risk.
+    citation:
+      act: National Credit Code
+      section: "39"
+    severity: high
+    checkerPrompt: >
+      Default interest more than 4-5% above the standard rate, or charged on the entire
+      principal rather than the unpaid amount. Propose amendment: default rate ≤ 4%
+      above standard rate, applied only to unpaid amount.
+
+  - id: bd-acceleration-without-notice
+    description: Lender may accelerate the entire loan immediately on default without notice or cure period.
+    citation:
+      act: National Credit Code
+      section: "88"
+    severity: critical
+    checkerPrompt: >
+      Lender right to demand entire balance immediately upon default, with no notice or
+      cure period. For NCC contracts, s 88 requires 30 days regardless. For non-NCC,
+      propose amendment: 14-day notice, 14-day cure period for monetary defaults; 30
+      days for non-monetary.
+
+  # --- GUARANTEE-SPECIFIC PROVISIONS ---
+  - id: bd-guarantee-uncapped
+    description: Personal / third-party guarantee with no financial cap.
+    citation:
+      act: Banking Code of Practice 2025 (ABA)
+      section: "31"
+    severity: high
+    checkerPrompt: >
+      Guarantee with no cap on principal exposure, or a cap that resets upwards on
+      drawdown. Propose amendment: cap at the original facility amount; no automatic
+      uplift.
+
+  - id: bd-guarantee-principal-debtor
+    description: Principal debtor clause — guarantor's obligations expressed as a primary debt, defeating Yerkey/Garcia equitable defences.
+    citation:
+      act: Banking Code of Practice 2025 (ABA)
+      section: "31"
+    severity: high
+    checkerPrompt: >
+      Look for "as principal debtor and not merely as surety" wording. Propose amendment:
+      preserve the suretyship status; clause not to operate to deny the guarantor any
+      defence available at common law or in equity.
+
+  - id: bd-guarantee-no-release-on-variation
+    description: Guarantee continues notwithstanding variation, replacement, or extension of borrower's facilities — guarantor not consulted.
+    citation:
+      act: Banking Code of Practice 2025 (ABA)
+      section: "31"
+    severity: high
+    checkerPrompt: >
+      Clause that keeps guarantor on the hook even where the facility is materially varied
+      or replaced. Strong Code of Banking Practice cl 31 issue. Propose amendment: any
+      material variation requires guarantor's prior consent or releases the guarantor.
+
+  # --- LENDER DISCRETIONS ---
+  - id: bd-unilateral-variation
+    description: Lender may vary fees, interest rates, or other key terms unilaterally.
+    citation:
+      act: Australian Consumer Law
+      section: "25"
+    severity: high
+    checkerPrompt: >
+      Asymmetric variation right: lender can change material terms (fees, default rate,
+      collateral requirements, covenants) on notice but borrower cannot. UCT candidate.
+      Propose amendment: variations to be by agreement; unilateral changes only for
+      changes in law or to correct manifest error; borrower has right to repay without
+      penalty if variation is material.
+
+  - id: bd-discretionary-default-events
+    description: Lender may declare default on broad / subjective grounds ("material adverse change", "anything that affects the lender's interests").
+    citation:
+      act: Australian Consumer Law
+      section: "24"
+    severity: high
+    checkerPrompt: >
+      Catch-all default events (e.g. "any event the lender determines is material",
+      "MAC clause") with no objective threshold. Propose amendment: tie to objective
+      thresholds (default on payment, breach of covenant, insolvency events) or remove.
+
+  - id: bd-lender-determines-amount
+    description: Amount owing or fees payable conclusively determined by lender's certificate.
+    citation:
+      act: Australian Consumer Law
+      section: "25"
+    severity: medium
+    checkerPrompt: >
+      "A certificate signed by an officer of the lender as to the amount owing is
+      conclusive evidence." UCT candidate. Propose amendment: certificate is prima facie
+      evidence only; borrower retains right to challenge for manifest error, fraud, or
+      mistake.
+
+  # --- INDEMNITY / COSTS ---
+  - id: bd-indemnity-broad
+    description: Borrower indemnifies lender on a "no fault" basis for everything including consequential loss.
+    citation:
+      act: Australian Consumer Law
+      section: "24"
+    severity: high
+    checkerPrompt: >
+      Broad indemnities covering lender's costs, expenses, losses, including consequential
+      and indirect loss, including for third-party claims. Propose amendment: indemnity
+      limited to direct loss caused by borrower's default or breach; exclude consequential
+      and indirect; lender to take reasonable steps to mitigate.
+
+  - id: bd-receivership-costs-borrower
+    description: Borrower indemnifies lender for receivership costs and the receiver's commission.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: medium
+    checkerPrompt: >
+      Standard but onerous. Propose amendment: cap receiver's commission at a market rate
+      (e.g. 5% of realisations); borrower has right to object to appointment of an
+      uncertified receiver.
+
+  # --- ENFORCEMENT / IPSO FACTO ---
+  - id: bd-self-help-without-court
+    description: Lender may take possession, change locks, sell assets without judicial supervision.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: medium
+    checkerPrompt: >
+      Self-help enforcement without notice or court order. Propose amendment: at minimum
+      14 days' notice; right to obtain valuations; court-supervised sale where exposure
+      ≥ $250k.
+
+  - id: bd-ipso-facto-trigger
+    description: Default triggered by the borrower commencing safe-harbour or scheme arrangements (ipso facto).
+    citation:
+      act: Corporations Act 2001 (Cth)
+      section: "451E"
+    severity: medium
+    checkerPrompt: >
+      Default events triggered by safe-harbour entry, scheme of arrangement, or directors'
+      consideration of insolvency advice. Modern ipso facto stays apply to many of these
+      under s 451E etc. — flag for awareness, propose amendment to align with the stay
+      carve-outs.
+
+  # --- DEEMED SERVICE / NOTICES ---
+  - id: bd-deemed-service-shortcut
+    description: Notices deemed served on dispatch (not on receipt), including by email.
+    citation:
+      act: Australian Consumer Law
+      section: "24"
+    severity: low
+    checkerPrompt: >
+      Notice provisions that deem service on the date of posting / sending, even where
+      not received. UCT candidate. Propose amendment: 2-business-day deemed service for
+      post; deemed service on email opening confirmation, otherwise 1 business day after
+      sending; physical address reqs.
+
+  # --- FINANCIAL COVENANTS ---
+  - id: bd-covenants-no-cure
+    description: Financial covenants (LVR, ICR, etc.) where breach is an immediate event of default with no cure right.
+    citation:
+      act: Australian Consumer Law
+      section: "24"
+    severity: high
+    checkerPrompt: >
+      Covenants tested at the lender's discretion, breach triggers immediate default with
+      no equity-cure right or notification opportunity. Propose amendment: equity cure
+      right (typically 30 days to inject capital), test methodology disclosed, lender to
+      provide test results before declaring default.
+
+  # --- VALUATION ---
+  - id: bd-valuation-borrower-cost
+    description: Borrower pays for any valuation the lender requests, at any time, on any basis.
+    citation:
+      act: Australian Consumer Law
+      section: "24"
+    severity: low
+    checkerPrompt: >
+      Lender may obtain valuations at borrower's cost without limit. Propose amendment:
+      borrower bears cost of one valuation per 24 months (more if event-of-default);
+      borrower entitled to a copy.

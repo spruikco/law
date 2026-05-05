@@ -1,0 +1,100 @@
+title: Patterns that make a special condition risky for the buyer
+# Starter list — LAWYER: expand as we review real contracts together.
+rules:
+  - id: sc-time-of-essence
+    description: Any provision making time of the essence against the purchaser.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "41"
+    severity: high
+    checkerPrompt: >
+      Flag any SC that makes time of the essence or tightens the default
+      notice period under the general conditions.
+
+  - id: sc-deposit-release
+    description: Early release of deposit to vendor before settlement.
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "27"
+    severity: high
+    checkerPrompt: >
+      Flag any SC releasing deposit to the vendor prior to settlement
+      (s 27 statement is a specific regime — confirm compliance).
+
+  - id: sc-waived-inspection
+    description: Waiver of building or pest inspection rights under general conditions.
+    citation:
+      act: LIV/REIV General Conditions
+      section: "(varies)"
+    severity: high
+    checkerPrompt: >
+      Flag any SC that waives, reduces, or tightens a building/pest/condition-precedent inspection right granted by the general conditions.
+
+  - id: sc-finance-no-condition
+    description: Contract with no finance condition.
+    citation:
+      act: LIV/REIV General Conditions
+      section: "14"
+    severity: critical
+    checkerPrompt: >
+      Flag if no subject-to-finance condition exists (or one has been
+      removed by an SC) — explain risk of forfeited deposit.
+
+  - id: sc-vendor-extension-unilateral
+    description: Vendor may unilaterally extend settlement.
+    citation:
+      act: Property Law Act 1958 (Vic)
+      section: "(general)"
+    severity: medium
+    checkerPrompt: >
+      Flag any SC granting the vendor a unilateral extension right, with
+      or without notice.
+
+  - id: sc-default-interest-high
+    description: Excessive default interest rate on late settlement.
+    severity: medium
+    citation:
+      act: LIV/REIV General Conditions
+      section: "27"
+    checkerPrompt: >
+      Flag if default interest is materially above the standard general
+      condition rate (e.g. RBA cash rate + 2%). Quote the rate.
+
+  - id: sc-gst-margin-scheme-purchaser
+    description: Purchaser bears GST or margin scheme risk not captured in particulars.
+    severity: medium
+    citation:
+      act: A New Tax System (GST) Act 1999 (Cth)
+      section: "75"
+    checkerPrompt: >
+      Flag any SC that shifts GST/margin-scheme risk onto the purchaser.
+
+  - id: sc-sunset-short
+    description: Sunset date unusually short (off-the-plan).
+    severity: medium
+    citation:
+      act: Sale of Land Act 1962 (Vic)
+      section: "10A"
+    checkerPrompt: >
+      For off-the-plan contracts, flag sunset dates under 24 months or
+      rights for the vendor to rescind on indefinite grounds.
+
+  - id: sc-chattels-excluded
+    description: Chattels listed as included are excluded by SC.
+    severity: low
+    citation:
+      act: LIV/REIV General Conditions
+      section: "7"
+    checkerPrompt: >
+      Flag any SC excluding chattels that are otherwise listed in the
+      particulars.
+
+  - id: sc-conflict-with-general
+    description: Special condition conflicts with an unrelated general condition without express variation language.
+    severity: high
+    citation:
+      act: LIV/REIV General Conditions
+      section: "(general)"
+    checkerPrompt: >
+      Flag any SC that appears to override a GC but does not explicitly
+      say which GC is varied. Compute net effect where possible.

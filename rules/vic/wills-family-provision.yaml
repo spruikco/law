@@ -1,0 +1,98 @@
+title: VIC Wills — family-provision exposure under Administration and Probate Act 1958 (Vic) Pt IV
+rules:
+  - id: wills-fp-spouse-omission
+    description: The testator's spouse or domestic partner has a strong moral claim and is an "eligible person" under AP Act s 90.
+    citation:
+      act: Administration and Probate Act 1958 (Vic)
+      section: "90"
+    severity: critical
+    triggerSignals:
+      - spouse / domestic partner identified in extraction.observations or testator
+      - spouse not appearing as a beneficiary, or receiving substantially less than residue
+    detectionPrompt: >
+      Identify any spouse or domestic partner of the testator from the extraction. If they
+      are NOT named as a beneficiary, OR if they receive a smaller share than the bulk of
+      the estate, set applies=true with severity=critical. Recommend a Pt IV exposure
+      analysis and that the supervising solicitor consider a notional-estate / contract /
+      mutual-wills review.
+
+  - id: wills-fp-minor-child-omission
+    description: A child under 18 has the strongest TFM claim per AP Act s 91A.
+    citation:
+      act: Administration and Probate Act 1958 (Vic)
+      section: "91A"
+    severity: critical
+    triggerSignals:
+      - child under 18 referred to in observations or extraction
+      - child not named as beneficiary, or receiving disproportionately less
+    detectionPrompt: >
+      Look for any child under 18 implied by the extraction (e.g. testator's age + reference
+      to "my children"). If a minor child is omitted or under-provided, applies=true,
+      severity=critical, recommend immediate Pt IV exposure assessment.
+
+  - id: wills-fp-adult-dependent-child
+    description: An adult child who is dependent on the testator (disability, ongoing financial assistance) may be an eligible person under s 90(e).
+    citation:
+      act: Administration and Probate Act 1958 (Vic)
+      section: "90(e)"
+    severity: high
+    triggerSignals:
+      - adult child described as dependent / disabled / under care
+      - inadequate provision relative to need
+    detectionPrompt: >
+      pass if no dependent-adult-child indicator. applies=true if extraction or observations
+      reference a child with disability or ongoing financial dependence and they are not
+      adequately provided for.
+
+  - id: wills-fp-stepchild
+    description: A stepchild may be an eligible person under s 90(c)-(d).
+    citation:
+      act: Administration and Probate Act 1958 (Vic)
+      section: "90(c)"
+    severity: medium
+    triggerSignals:
+      - stepchild referenced in observations
+      - stepchild excluded from gifts
+    detectionPrompt: >
+      applies=true if a stepchild is referenced and excluded — recommend Vigolo v Bostin
+      moral-duty analysis.
+
+  - id: wills-fp-former-spouse
+    description: A former spouse who has not had a property settlement may be an eligible person under s 90(b).
+    citation:
+      act: Administration and Probate Act 1958 (Vic)
+      section: "90(b)"
+    severity: medium
+    triggerSignals:
+      - reference to ex-spouse / former domestic partner
+      - no Family Law property orders
+    detectionPrompt: >
+      applies=true if observations reference a former spouse without finalised property
+      settlement.
+
+  - id: wills-fp-household-member
+    description: A registered carer or household member who has been receiving support may be an eligible person under s 90(g)-(h).
+    citation:
+      act: Administration and Probate Act 1958 (Vic)
+      section: "90(g)"
+    severity: medium
+    triggerSignals:
+      - carer / housemate / dependent relative referenced
+      - omitted from gifts
+    detectionPrompt: >
+      applies=true if a carer or registered caring partner is referenced but omitted from
+      the will.
+
+  - id: wills-fp-disproportionate-distribution
+    description: Highly disproportionate distribution between same-class beneficiaries (e.g. one child gets the bulk while siblings receive token gifts) materially raises Pt IV exposure.
+    citation:
+      act: Administration and Probate Act 1958 (Vic)
+      section: "Pt IV"
+    severity: high
+    triggerSignals:
+      - one child receives most of the estate while others receive nominal gifts
+      - estranged-child token gift
+    detectionPrompt: >
+      applies=true if the extraction shows disproportionate gifts to children of the same
+      class. Recommend a statement of reasons for disinheritance be prepared and held with
+      the will (does not bar a claim but assists evidence).

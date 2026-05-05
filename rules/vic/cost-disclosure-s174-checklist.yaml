@@ -1,0 +1,113 @@
+title: VIC LPUL s 174 cost disclosure mandatory elements
+rules:
+  - id: cd-s174-fee-basis
+    description: Disclose the basis on which legal costs will be calculated.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "174(1)(a)"
+    severity: critical
+    checkerPrompt: >
+      The input must include feeBasis. pass if feeBasis is set. fail if missing.
+      For "hourly" or "blended", hourlyRates must be non-empty (warning otherwise).
+      For "fixed", fixedFeeAmount must be set (warning otherwise).
+
+  - id: cd-s174-estimate
+    description: Disclose an estimated total of legal costs (or a range), and disclose if the estimate is significantly likely to change.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "174(1)(b)"
+    severity: critical
+    checkerPrompt: >
+      Either estimatedTotal OR estimateRange must be set OR (for fixed) fixedFeeAmount.
+      pass if any present. fail if all missing. warning if estimateRange is provided
+      but the spread (high - low) is more than 100% of low (likely too wide for s 174).
+
+  - id: cd-s174-significant-change
+    description: The disclosure must inform the client of the obligation to update if there is a substantial change in legal costs.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "174(1)(b) + s 174(3)"
+    severity: high
+    checkerPrompt: >
+      The composed letter (or noteToClient) must reference the firm's commitment to
+      updating the estimate if circumstances substantially change. needs_review by
+      default for the composer to confirm.
+
+  - id: cd-s174-progress-information
+    description: The client must be informed of their right to receive progress reports and to be notified of substantial changes in cost.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "174(2)"
+    severity: high
+    checkerPrompt: >
+      The composed letter must contain a "client rights" section noting progress-update
+      rights. needs_review by default.
+
+  - id: cd-s174-bill-and-itemised-bill
+    description: The client has a right to receive a bill, and a right to request an itemised bill within 30 days of receipt of a lump-sum bill.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "187 + 174(2)"
+    severity: high
+    checkerPrompt: >
+      The letter must reference the right to a bill and to request an itemised bill. needs_review by default.
+
+  - id: cd-s174-vlsbc-and-disputes
+    description: The client must be informed of the avenues for resolving costs disputes — VLSB+C complaint, costs assessment under Pt 5.4, common-law options.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "174(2) + Pt 5.4"
+    severity: high
+    checkerPrompt: >
+      The letter must include a dispute-resolution section referring to VLSB+C and
+      Pt 5.4 costs assessment. needs_review by default.
+
+  - id: cd-s182-uplift-cap
+    description: An uplift fee under a conditional costs agreement must not exceed 25%.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "182"
+    severity: critical
+    checkerPrompt: >
+      If isConditional is true and upliftPercent is set, fail if > 25. pass if <= 25.
+      pass if isConditional is false.
+
+  - id: cd-s181-conditional-costs
+    description: A conditional costs agreement must be in writing, must specify the contingency, and must inform the client they have 5 business days to consider before signing.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "181"
+    severity: high
+    checkerPrompt: >
+      If isConditional is true, the letter must include a conditional-costs section that
+      addresses the contingency definition, the 5-business-day cooling-off, and the right
+      to terminate. needs_review by default. pass if isConditional is false.
+
+  - id: cd-s174-disbursements
+    description: Anticipated disbursements should be itemised where reasonably foreseeable.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "174(1)(b)"
+    severity: medium
+    checkerPrompt: >
+      pass if disbursementsAnticipated has at least one entry OR matterType is
+      "advice_only". warning if empty.
+
+  - id: cd-s174-payment-terms
+    description: Disclosure should specify billing frequency and payment terms.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "174(1)(b)"
+    severity: medium
+    checkerPrompt: >
+      pass if billingFrequency and paymentTerms are non-empty strings. warning otherwise.
+
+  - id: cd-s174-sophisticated-client
+    description: For a sophisticated client per s 174(4), the disclosure may be modified — note this on the letter.
+    citation:
+      act: Legal Profession Uniform Law Application Act 2014 (Vic)
+      section: "174(4)"
+    severity: low
+    checkerPrompt: >
+      pass if isSophisticatedClient is false. warning if true (note the modified
+      disclosure obligations and that the client has waived some s 174 protections).

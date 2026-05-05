@@ -1,0 +1,35 @@
+title: Owners Corporation red-flag rules
+# Per PRJ-658: we're looking for what's FUCKED, not ongoing routine levies.
+# LAWYER: extend this list from real OC certs you've reviewed.
+rules:
+  - id: oc-active-special-levy
+    description: Any current or recently-raised special levy must be surfaced prominently.
+    citation:
+      act: Owners Corporations Act 2006 (Vic)
+      section: "23"
+    severity: high
+    applies: "ownersCorp.applies === true"
+    checkerPrompt: >
+      If specialLevies[] is non-empty, raise a risk item for each.
+
+  - id: oc-flagged-future-obligation
+    description: Flagged future financial obligations (upcoming major works, sinking fund shortfalls).
+    citation:
+      act: Owners Corporations Act 2006 (Vic)
+      section: "151"
+    severity: high
+    applies: "ownersCorp.applies === true"
+    checkerPrompt: >
+      For each item in flaggedFutureObligations[], surface as a risk with
+      the context quoted from the OC minutes/certificate.
+
+  - id: oc-damage
+    description: Disclosed damage to property.
+    citation:
+      act: Owners Corporations Act 2006 (Vic)
+      section: "151"
+    severity: medium
+    applies: "ownersCorp.applies === true"
+    checkerPrompt: >
+      For each item in damageToProperty[], surface as a warning and flag
+      any potential impact on future levies.
