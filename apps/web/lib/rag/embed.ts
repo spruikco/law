@@ -7,11 +7,10 @@
  * once VOYAGE_API_KEY is provisioned.
  */
 
-import { env, pipeline, type FeatureExtractionPipeline } from "@huggingface/transformers";
-
-// Transformers.js caches models under node_modules by default. Keep it in
-// a stable location so dev reloads don't re-download.
-env.cacheDir = process.env.TRANSFORMERS_CACHE ?? ".cache/transformers";
+// Lazy-loaded type alias — avoid pulling the native onnxruntime binding at
+// module load time (breaks Next.js `collect page data` on minimal containers
+// without glibc).
+type FeatureExtractionPipeline = import("@huggingface/transformers").FeatureExtractionPipeline;
 
 const MODEL_ID = "Xenova/bge-base-en-v1.5";
 export const EMBED_DIMS = 768;
@@ -19,9 +18,15 @@ export const EMBED_DIMS = 768;
 let extractorPromise: Promise<FeatureExtractionPipeline> | null = null;
 
 async function getExtractor(): Promise<FeatureExtractionPipeline> {
-  extractorPromise ??= pipeline("feature-extraction", MODEL_ID, {
-    dtype: "fp32",
-  }) as Promise<FeatureExtractionPipeline>;
+  if (!extractorPromise) {
+    const { env, pipeline } = await import("@huggingface/transformers");
+    // Transformers.js caches models under node_modules by default. Keep it in
+    // a stable location so dev reloads don't re-download.
+    env.cacheDir = process.env.TRANSFORMERS_CACHE ?? ".cache/transformers";
+    extractorPromise = pipeline("feature-extraction", MODEL_ID, {
+      dtype: "fp32",
+    }) as Promise<FeatureExtractionPipeline>;
+  }
   return extractorPromise;
 }
 
