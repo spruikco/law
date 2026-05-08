@@ -4,8 +4,9 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { PoaReview, PoaReviewStatus } from "@law/schema";
 import type { PoaPipelineProgress } from "../poa-pipeline/types";
+import { repoRoot } from "../paths";
 
-const STORE_DIR = path.resolve(process.cwd(), "..", "..", ".cache", "poa-reviews");
+const STORE_DIR = path.join(repoRoot(), ".cache", "poa-reviews");
 
 type Listener = (evt: PoaProgressEnvelope) => void;
 

@@ -10,6 +10,7 @@ import {
   type BankDocsExtractionBundle,
   type Jurisdiction,
 } from "@law/schema";
+import { repoRoot } from "../paths";
 import { anthropic, Models } from "../anthropic/client";
 import { retrieve } from "../rag";
 
@@ -61,7 +62,7 @@ const RuleFileSchema = z.object({
   rules: z.array(BankUnRuleSchema),
 });
 
-const ROOT = path.resolve(process.cwd(), "..", "..", "rules");
+const ROOT = path.join(repoRoot(), "rules");
 function resolveRulePath(jurisdiction: Jurisdiction, filename: string): string {
   const j = jurisdiction.toLowerCase();
   const primary = path.join(ROOT, j, filename);

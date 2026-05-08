@@ -4,12 +4,13 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { BankDocsReview, BankDocsReviewStatus } from "@law/schema";
 import type { BankDocsPipelineProgress } from "../bank-docs-pipeline/types";
+import { repoRoot } from "../paths";
 
 /**
  * File-backed bank-docs review store. Mirrors lease-reviews.
  */
 
-const STORE_DIR = path.resolve(process.cwd(), "..", "..", ".cache", "bank-docs-reviews");
+const STORE_DIR = path.join(repoRoot(), ".cache", "bank-docs-reviews");
 
 type Listener = (evt: BankDocsProgressEnvelope) => void;
 

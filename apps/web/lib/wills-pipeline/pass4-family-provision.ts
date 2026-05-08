@@ -10,6 +10,7 @@ import {
   type Jurisdiction,
   type WillExtraction,
 } from "@law/schema";
+import { repoRoot } from "../paths";
 import { anthropic, Models } from "../anthropic/client";
 
 const FpRuleSchema = z.object({
@@ -31,7 +32,7 @@ const RuleFileSchema = z.object({
   rules: z.array(FpRuleSchema),
 });
 
-const ROOT = path.resolve(process.cwd(), "..", "..", "rules");
+const ROOT = path.join(repoRoot(), "rules");
 function resolveRulePath(jurisdiction: Jurisdiction, filename: string): string {
   const j = jurisdiction.toLowerCase();
   const primary = path.join(ROOT, j, filename);

@@ -8,8 +8,9 @@ import type {
   CostDisclosureReviewStatus,
 } from "@law/schema";
 import type { CostDisclosurePipelineProgress } from "../cost-disclosure-pipeline/types";
+import { repoRoot } from "../paths";
 
-const STORE_DIR = path.resolve(process.cwd(), "..", "..", ".cache", "cost-disclosure-reviews");
+const STORE_DIR = path.join(repoRoot(), ".cache", "cost-disclosure-reviews");
 
 type Listener = (evt: CostDisclosureProgressEnvelope) => void;
 

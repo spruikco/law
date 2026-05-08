@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Review, ReviewStatus } from "@law/schema";
 import type { PipelineProgress } from "../pipeline/types";
+import { repoRoot } from "../paths";
 
 /**
  * File-backed review store. Swap to Supabase when credentials land.
@@ -13,7 +14,7 @@ import type { PipelineProgress } from "../pipeline/types";
  * so /api/review/[id]/events can subscribe.
  */
 
-const STORE_DIR = path.resolve(process.cwd(), "..", "..", ".cache", "reviews");
+const STORE_DIR = path.join(repoRoot(), ".cache", "reviews");
 
 type Listener = (evt: ProgressEnvelope) => void;
 

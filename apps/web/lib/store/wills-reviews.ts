@@ -4,8 +4,9 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { WillReview, WillReviewStatus } from "@law/schema";
 import type { WillsPipelineProgress } from "../wills-pipeline/types";
+import { repoRoot } from "../paths";
 
-const STORE_DIR = path.resolve(process.cwd(), "..", "..", ".cache", "wills-reviews");
+const STORE_DIR = path.join(repoRoot(), ".cache", "wills-reviews");
 
 type Listener = (evt: WillsProgressEnvelope) => void;
 

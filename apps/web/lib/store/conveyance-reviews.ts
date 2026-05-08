@@ -8,8 +8,9 @@ import type {
   SettlementInput,
 } from "@law/schema";
 import type { ConveyancePipelineProgress } from "../conveyance-pipeline/types";
+import { repoRoot } from "../paths";
 
-const STORE_DIR = path.resolve(process.cwd(), "..", "..", ".cache", "conveyance-reviews");
+const STORE_DIR = path.join(repoRoot(), ".cache", "conveyance-reviews");
 
 type Listener = (evt: ConveyanceProgressEnvelope) => void;
 

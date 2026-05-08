@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { LeaseReview, LeaseReviewStatus } from "@law/schema";
 import type { LeasePipelineProgress } from "../lease-pipeline/types";
+import { repoRoot } from "../paths";
 
 /**
  * File-backed lease review store — parallel to lib/store/reviews.ts for s32.
@@ -11,7 +12,7 @@ import type { LeasePipelineProgress } from "../lease-pipeline/types";
  * events via an in-process listener map.
  */
 
-const STORE_DIR = path.resolve(process.cwd(), "..", "..", ".cache", "lease-reviews");
+const STORE_DIR = path.join(repoRoot(), ".cache", "lease-reviews");
 
 type Listener = (evt: LeaseProgressEnvelope) => void;
 

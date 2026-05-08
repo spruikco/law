@@ -8,8 +8,9 @@ import type {
   BillingReviewStatus,
 } from "@law/schema";
 import type { BillingPipelineProgress } from "../billing-pipeline/types";
+import { repoRoot } from "../paths";
 
-const STORE_DIR = path.resolve(process.cwd(), "..", "..", ".cache", "billing-reviews");
+const STORE_DIR = path.join(repoRoot(), ".cache", "billing-reviews");
 
 type Listener = (evt: BillingProgressEnvelope) => void;
 

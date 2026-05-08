@@ -8,8 +8,9 @@ import type {
   TrustAccountReviewStatus,
 } from "@law/schema";
 import type { TrustAccountPipelineProgress } from "../trust-accounting-pipeline/types";
+import { repoRoot } from "../paths";
 
-const STORE_DIR = path.resolve(process.cwd(), "..", "..", ".cache", "trust-accounting-reviews");
+const STORE_DIR = path.join(repoRoot(), ".cache", "trust-accounting-reviews");
 
 type Listener = (evt: TrustAccountProgressEnvelope) => void;
 

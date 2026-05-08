@@ -4,6 +4,7 @@ import path from "node:path";
 import YAML from "yaml";
 import { z } from "zod";
 import type { Jurisdiction } from "@law/schema";
+import { repoRoot } from "../paths";
 
 export const RuleSchema = z.object({
   id: z.string(),
@@ -59,7 +60,7 @@ export const UnenforceabilityRulesFileSchema = z.object({
   rules: z.array(UnenforceabilityRuleSchema),
 });
 
-const ROOT = path.resolve(process.cwd(), "..", "..", "rules");
+const ROOT = path.join(repoRoot(), "rules");
 
 /**
  * Resolve a rules file for a given jurisdiction. If the requested
