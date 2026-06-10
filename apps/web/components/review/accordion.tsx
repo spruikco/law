@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 export function AccordionItem({
   summary,
@@ -12,17 +12,24 @@ export function AccordionItem({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const panelId = useId();
   return (
     <div className="border-b border-zinc-100 last:border-b-0">
       <button
         type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-start gap-3 py-3 px-4 text-left transition-colors hover:bg-zinc-50"
       >
         <Chevron open={open} />
         <div className="flex-1 min-w-0">{summary}</div>
       </button>
-      {open && <div className="px-4 pb-4 pl-11">{children}</div>}
+      {open && (
+        <div id={panelId} role="region" className="px-4 pb-4 pl-11">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -36,6 +43,7 @@ function Chevron({ open }: { open: boolean }) {
       strokeWidth="1.75"
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
       className={`mt-0.5 h-4 w-4 shrink-0 text-zinc-400 transition-transform ${
         open ? "rotate-90" : ""
       }`}

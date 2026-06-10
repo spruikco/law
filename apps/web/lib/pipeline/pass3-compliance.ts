@@ -5,6 +5,7 @@ import {
   type ExtractionBundle,
 } from "@law/schema";
 import { anthropic, Models } from "../anthropic/client";
+import { withRetry } from "../anthropic/retry";
 import { retrieve } from "../rag";
 import { loadRules, type Rule } from "../rules/loader";
 
@@ -55,6 +56,39 @@ function shouldApply(rule: Rule, bundle: ExtractionBundle): boolean {
   return true;
 }
 
+/**
+ * Shared system prompt for every rule check in this review. The extraction
+ * bundle dominates the token count, and it is identical across the ~20 rule
+ * calls — marking it ephemeral lets every call after the first hit the
+ * prompt cache (tools + system form the cached prefix).
+ */
+function buildSystem(bundle: ExtractionBundle): Anthropic.TextBlockParam[] {
+  return [
+    {
+      type: "text",
+      text: `You are checking compliance rules, one per request, against extracted data from a Victorian property contract + Section 32.
+
+Extracted data (JSON):
+${JSON.stringify(bundle, null, 2)}
+
+For the rule given in the user message, decide: pass / fail / warning / needs_review.
+- pass: requirement is clearly met
+- fail: requirement is clearly NOT met (missing, inconsistent, or defective)
+- warning: requirement is marginal — lawyer should look
+- needs_review: insufficient data to tell
+
+Then call record_finding with:
+- status
+- severity (raise above default if the issue is serious)
+- title (short, lawyer-facing)
+- explanation (2–4 sentences; reference exact data you saw)
+- citations (at minimum, the rule's own citation; add retrieved-excerpt citations if used)
+- sourceRefs (optional pointers back to extracted fields, e.g. 'particulars.price')`,
+      cache_control: { type: "ephemeral" },
+    },
+  ];
+}
+
 async function checkRule(
   rule: Rule,
   bundle: ExtractionBundle,
@@ -80,9 +114,7 @@ async function checkRule(
     // RAG store not initialised yet — proceed without retrieval
   }
 
-  const prompt = `You are checking ONE compliance rule against extracted data from a Victorian property contract + Section 32.
-
-Rule:
+  const prompt = `Rule:
   id: ${rule.id}
   description: ${rule.description}
   citation: ${rule.citation.act} s ${rule.citation.section}
@@ -90,40 +122,28 @@ Rule:
 
 Checker instructions:
 ${rule.checkerPrompt}
+${retrievedBlock}`;
 
-Extracted data (JSON):
-${JSON.stringify(bundle, null, 2)}
-${retrievedBlock}
-
-Decide: pass / fail / warning / needs_review.
-- pass: requirement is clearly met
-- fail: requirement is clearly NOT met (missing, inconsistent, or defective)
-- warning: requirement is marginal — lawyer should look
-- needs_review: insufficient data to tell
-
-Then call record_finding with:
-- status
-- severity (raise above default if the issue is serious)
-- title (short, lawyer-facing)
-- explanation (2–4 sentences; reference exact data you saw)
-- citations (at minimum, the rule's own citation; add retrieved-excerpt citations if used)
-- sourceRefs (optional pointers back to extracted fields, e.g. 'particulars.price')`;
-
-  const res = await anthropic.messages.create({
-    model: Models.Sonnet,
-    max_tokens: 1024,
-    tools: [CHECK_TOOL],
-    tool_choice: { type: "tool", name: "record_finding" },
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const toolUse = res.content.find((b) => b.type === "tool_use");
-  if (!toolUse || toolUse.type !== "tool_use") {
-    throw new Error(`pass3-compliance: tool not called for rule '${rule.id}'`);
-  }
-  const input = toolUse.input as Omit<ComplianceFinding, "ruleId" | "citations"> & {
-    citations?: ComplianceFinding["citations"];
-  };
+  const input = await withRetry(
+    async () => {
+      const res = await anthropic.messages.create({
+        model: Models.Sonnet,
+        max_tokens: 1024,
+        system: buildSystem(bundle),
+        tools: [CHECK_TOOL],
+        tool_choice: { type: "tool", name: "record_finding" },
+        messages: [{ role: "user", content: prompt }],
+      });
+      const toolUse = res.content.find((b) => b.type === "tool_use");
+      if (!toolUse || toolUse.type !== "tool_use") {
+        throw new Error(`pass3-compliance: tool not called for rule '${rule.id}'`);
+      }
+      return toolUse.input as Omit<ComplianceFinding, "ruleId" | "citations"> & {
+        citations?: ComplianceFinding["citations"];
+      };
+    },
+    { label: `pass3-compliance rule ${rule.id}` },
+  );
 
   return ComplianceFindingSchema.parse({
     ruleId: rule.id,
@@ -159,17 +179,26 @@ export async function checkCompliance(
   }
   const applicable = allRules.filter((r) => shouldApply(r, extraction));
 
-  // Check rules in parallel — bounded concurrency via Promise.all chunks
+  // Check rules in parallel — bounded concurrency via Promise.all chunks.
+  // The first rule runs alone so it writes the shared prompt-cache prefix
+  // (extraction bundle + instructions) before the concurrent batches read it.
   const results: ComplianceFinding[] = [];
   const CONCURRENCY = 5;
+  const total = applicable.length;
   let done = 0;
+  if (applicable.length > 1) {
+    const first = applicable.shift()!;
+    results.push(await checkRule(first, extraction));
+    done += 1;
+    opts.onRuleChecked?.(done, total, first.id);
+  }
   for (let i = 0; i < applicable.length; i += CONCURRENCY) {
     const batch = applicable.slice(i, i + CONCURRENCY);
     const checked = await Promise.all(
       batch.map(async (r) => {
         const finding = await checkRule(r, extraction);
         done += 1;
-        opts.onRuleChecked?.(done, applicable.length, r.id);
+        opts.onRuleChecked?.(done, total, r.id);
         return finding;
       }),
     );

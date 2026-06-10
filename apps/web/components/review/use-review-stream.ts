@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface PipelineProgressEvent {
   message: string;
@@ -8,6 +8,8 @@ export interface PipelineProgressEvent {
   total?: number;
   pass: number;
 }
+
+export type StreamConnection = "connecting" | "open" | "reconnecting" | "closed";
 
 export interface ReviewStreamState<R extends { id: string; status: string; createdAt: string }> {
   review: R;
@@ -18,12 +20,19 @@ export interface ReviewStreamState<R extends { id: string; status: string; creat
   lastEventAt: number;
   now: number;
   totalElapsedSec: number;
+  /** SSE connection state — "reconnecting" means events may be delayed. */
+  connection: StreamConnection;
 }
 
 /**
  * Subscribe to the SSE event stream for a review and accumulate state.
  * Pass the SSE endpoint (e.g. `/api/review/${id}/events`) and the initial
  * review record. Terminal states (`complete` / `failed`) skip the stream.
+ *
+ * On network drops the browser's EventSource auto-reconnect kicks in and the
+ * server replays the current review state on each new connection, so the UI
+ * catches up by itself; we only close the stream once the review reaches a
+ * terminal status (otherwise the reconnect loop would re-open it forever).
  */
 export function useReviewStream<R extends { id: string; status: string; createdAt: string }>(
   initial: R,
@@ -36,9 +45,15 @@ export function useReviewStream<R extends { id: string; status: string; createdA
     Record<number, PipelineProgressEvent>
   >({});
   const [eventCount, setEventCount] = useState(0);
+  // Clock samples for the elapsed/quiet-time UI — intentionally impure
+  // initial values; they only seed the display until the first tick/event.
+  // eslint-disable-next-line react-hooks/purity
   const [lastEventAt, setLastEventAt] = useState<number>(Date.now());
+  // eslint-disable-next-line react-hooks/purity
   const [now, setNow] = useState<number>(Date.now());
-  const streamRef = useRef<EventSource | null>(null);
+  const [connection, setConnection] = useState<StreamConnection>(
+    initial.status === "complete" || initial.status === "failed" ? "closed" : "connecting",
+  );
 
   useEffect(() => {
     if (review.status === "complete" || review.status === "failed") return;
@@ -47,6 +62,10 @@ export function useReviewStream<R extends { id: string; status: string; createdA
   }, [review.status]);
 
   useEffect(() => {
+    // Records when each pipeline stage was first observed; runs once per
+    // status change and bails out when already recorded, so the extra render
+    // pass is bounded.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStageStart((prev) =>
       prev[review.status] ? prev : { ...prev, [review.status]: Date.now() },
     );
@@ -55,14 +74,25 @@ export function useReviewStream<R extends { id: string; status: string; createdA
   useEffect(() => {
     if (initial.status === "complete" || initial.status === "failed") return;
     const es = new EventSource(eventsEndpoint);
-    streamRef.current = es;
+    let closed = false;
+    const close = () => {
+      if (closed) return;
+      closed = true;
+      es.close();
+      setConnection("closed");
+    };
+    es.onopen = () => {
+      if (!closed) setConnection("open");
+    };
     es.onmessage = (ev) => {
       try {
         const data = JSON.parse(ev.data);
         setEventCount((c) => c + 1);
         setLastEventAt(Date.now());
         if (data.type === "review") {
-          setReview(data.review as R);
+          const next = data.review as R;
+          setReview(next);
+          if (next.status === "complete" || next.status === "failed") close();
         } else if (data.type === "letter_chunk") {
           setLetterStream((prev) => prev + data.text);
         } else if (data.type === "progress") {
@@ -75,13 +105,18 @@ export function useReviewStream<R extends { id: string; status: string; createdA
               pass: data.pass,
             },
           }));
+        } else if (data.type === "error") {
+          close();
         }
       } catch {
-        /* ignore */
+        /* malformed event — skip it; the next review snapshot resyncs state */
       }
     };
-    es.onerror = () => es.close();
-    return () => es.close();
+    es.onerror = () => {
+      // EventSource reconnects automatically; surface the gap to the UI.
+      if (!closed) setConnection("reconnecting");
+    };
+    return close;
   }, [initial.id, initial.status, eventsEndpoint]);
 
   const totalElapsedSec = Math.max(
@@ -98,6 +133,7 @@ export function useReviewStream<R extends { id: string; status: string; createdA
     lastEventAt,
     now,
     totalElapsedSec,
+    connection,
   };
 }
 

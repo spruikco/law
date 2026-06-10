@@ -106,6 +106,7 @@ export function BankDocsReviewViewer({ initial }: { initial: BankDocsReview }) {
     lastEventAt,
     now,
     totalElapsedSec,
+    connection,
   } = stream;
 
   const stageIdx = STATUS_ORDER[review.status] ?? 0;
@@ -180,6 +181,7 @@ export function BankDocsReviewViewer({ initial }: { initial: BankDocsReview }) {
         eventCount={eventCount}
         lastEventAt={lastEventAt}
         totalElapsedSec={totalElapsedSec}
+      connection={connection}
         deliverable={deliverable}
         findingsGroups={findingsGroups}
         particulars={

@@ -13,7 +13,9 @@ function getClient(): Anthropic {
       "ANTHROPIC_API_KEY is not set. Add it to .env.local or your environment.",
     );
   }
-  _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // A review runs for minutes across dozens of calls — ride out transient
+  // 429/5xx/connection errors rather than failing the whole pipeline.
+  _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 4 });
   return _client;
 }
 

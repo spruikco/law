@@ -89,6 +89,7 @@ export function PoaReviewViewer({ initial }: { initial: PoaReview }) {
     lastEventAt,
     now,
     totalElapsedSec,
+    connection,
   } = stream;
 
   const stageIdx = STATUS_ORDER[review.status] ?? 0;
@@ -156,6 +157,7 @@ export function PoaReviewViewer({ initial }: { initial: PoaReview }) {
         eventCount={eventCount}
         lastEventAt={lastEventAt}
         totalElapsedSec={totalElapsedSec}
+      connection={connection}
         deliverable={deliverable}
         findingsGroups={findingsGroups}
         particulars={

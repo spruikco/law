@@ -5,6 +5,7 @@ import {
   type LeaseExtractionBundle,
 } from "@law/schema";
 import { anthropic, Models } from "../anthropic/client";
+import { withRetry } from "../anthropic/retry";
 import { retrieve } from "../rag";
 import { loadRules, type Rule } from "../rules/loader";
 
@@ -43,6 +44,32 @@ const CHECK_TOOL: Anthropic.Tool = {
   },
 };
 
+/**
+ * Shared system prompt for every rule check in this review — the extraction
+ * bundle is identical across rule calls, so cache it (see pass3-compliance
+ * in the property pipeline for the same pattern).
+ */
+function buildSystem(bundle: LeaseExtractionBundle): Anthropic.TextBlockParam[] {
+  return [
+    {
+      type: "text",
+      text: `You are checking compliance rules, one per request, against extracted data from a Victorian commercial lease.
+
+Extracted data (JSON):
+${JSON.stringify(bundle, null, 2)}
+
+For the rule given in the user message, decide: pass / fail / warning / needs_review.
+- pass: requirement is clearly met
+- fail: requirement is clearly NOT met
+- warning: requirement is marginal — lawyer should look
+- needs_review: insufficient data
+
+Call record_finding with status, severity, title, explanation, citations, sourceRefs.`,
+      cache_control: { type: "ephemeral" },
+    },
+  ];
+}
+
 async function checkRule(
   rule: Rule,
   bundle: LeaseExtractionBundle,
@@ -67,9 +94,7 @@ async function checkRule(
     // corpus not ready
   }
 
-  const prompt = `You are checking ONE compliance rule against extracted data from a Victorian commercial lease.
-
-Rule:
+  const prompt = `Rule:
   id: ${rule.id}
   description: ${rule.description}
   citation: ${rule.citation.act} s ${rule.citation.section}
@@ -77,34 +102,28 @@ Rule:
 
 Checker instructions:
 ${rule.checkerPrompt}
+${retrievedBlock}`;
 
-Extracted data (JSON):
-${JSON.stringify(bundle, null, 2)}
-${retrievedBlock}
-
-Decide: pass / fail / warning / needs_review.
-- pass: requirement is clearly met
-- fail: requirement is clearly NOT met
-- warning: requirement is marginal — lawyer should look
-- needs_review: insufficient data
-
-Call record_finding with status, severity, title, explanation, citations, sourceRefs.`;
-
-  const res = await anthropic.messages.create({
-    model: Models.Sonnet,
-    max_tokens: 1024,
-    tools: [CHECK_TOOL],
-    tool_choice: { type: "tool", name: "record_finding" },
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const toolUse = res.content.find((b) => b.type === "tool_use");
-  if (!toolUse || toolUse.type !== "tool_use") {
-    throw new Error(`lease pass3: tool not called for rule '${rule.id}'`);
-  }
-  const input = toolUse.input as Omit<ComplianceFinding, "ruleId" | "citations"> & {
-    citations?: ComplianceFinding["citations"];
-  };
+  const input = await withRetry(
+    async () => {
+      const res = await anthropic.messages.create({
+        model: Models.Sonnet,
+        max_tokens: 1024,
+        system: buildSystem(bundle),
+        tools: [CHECK_TOOL],
+        tool_choice: { type: "tool", name: "record_finding" },
+        messages: [{ role: "user", content: prompt }],
+      });
+      const toolUse = res.content.find((b) => b.type === "tool_use");
+      if (!toolUse || toolUse.type !== "tool_use") {
+        throw new Error(`lease pass3: tool not called for rule '${rule.id}'`);
+      }
+      return toolUse.input as Omit<ComplianceFinding, "ruleId" | "citations"> & {
+        citations?: ComplianceFinding["citations"];
+      };
+    },
+    { label: `lease pass3 rule ${rule.id}` },
+  );
 
   return ComplianceFindingSchema.parse({
     ruleId: rule.id,
@@ -137,16 +156,25 @@ export async function checkRlaCompliance(
     allRules.push(...(await loadRules(f)));
   }
 
+  // First rule runs alone to write the shared prompt-cache prefix before
+  // the concurrent batches read it.
   const results: ComplianceFinding[] = [];
   const CONCURRENCY = 5;
+  const total = allRules.length;
   let done = 0;
+  if (allRules.length > 1) {
+    const first = allRules.shift()!;
+    results.push(await checkRule(first, bundle));
+    done += 1;
+    opts.onRuleChecked?.(done, total, first.id);
+  }
   for (let i = 0; i < allRules.length; i += CONCURRENCY) {
     const batch = allRules.slice(i, i + CONCURRENCY);
     const checked = await Promise.all(
       batch.map(async (r) => {
         const finding = await checkRule(r, bundle);
         done += 1;
-        opts.onRuleChecked?.(done, allRules.length, r.id);
+        opts.onRuleChecked?.(done, total, r.id);
         return finding;
       }),
     );

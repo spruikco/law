@@ -12,6 +12,8 @@
     "build": "npm run build --workspace=web",
     "start": "npm run start --workspace=web",
     "lint": "npm run lint --workspace=web",
+    "typecheck": "npm run typecheck --workspace=web",
+    "test": "npm run test --workspace=web",
     "fetch:legislation": "tsx packages/legislation/src/fetch-austlii.ts",
     "ingest:legislation": "tsx packages/legislation/src/ingest.ts"
   },
