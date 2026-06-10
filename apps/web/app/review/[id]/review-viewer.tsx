@@ -84,6 +84,7 @@ export function ReviewViewer({ initial }: { initial: Review }) {
     lastEventAt,
     now,
     totalElapsedSec,
+    connection,
   } = stream;
 
   const stageIdx = STATUS_ORDER[review.status] ?? 0;
@@ -129,6 +130,7 @@ export function ReviewViewer({ initial }: { initial: Review }) {
       eventCount={eventCount}
       lastEventAt={lastEventAt}
       totalElapsedSec={totalElapsedSec}
+      connection={connection}
       exportLinks={
         complete
           ? [

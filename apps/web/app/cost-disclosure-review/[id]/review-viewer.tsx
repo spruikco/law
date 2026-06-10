@@ -68,6 +68,7 @@ export function CostDisclosureViewer({
     lastEventAt,
     now,
     totalElapsedSec,
+    connection,
   } = stream;
 
   const stageIdx = STATUS_ORDER[review.status] ?? 0;
@@ -122,6 +123,7 @@ export function CostDisclosureViewer({
         eventCount={eventCount}
         lastEventAt={lastEventAt}
         totalElapsedSec={totalElapsedSec}
+      connection={connection}
         deliverable={deliverable}
         findingsGroups={findingsGroups}
         particulars={<Particulars review={review} />}

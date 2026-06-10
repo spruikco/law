@@ -101,6 +101,7 @@ export function LeaseReviewViewer({ initial }: { initial: LeaseReview }) {
     lastEventAt,
     now,
     totalElapsedSec,
+    connection,
   } = stream;
 
   const stageIdx = STATUS_ORDER[review.status] ?? 0;
@@ -194,6 +195,7 @@ export function LeaseReviewViewer({ initial }: { initial: LeaseReview }) {
         eventCount={eventCount}
         lastEventAt={lastEventAt}
         totalElapsedSec={totalElapsedSec}
+      connection={connection}
         deliverable={deliverable}
         findingsGroups={findingsGroups}
         particulars={

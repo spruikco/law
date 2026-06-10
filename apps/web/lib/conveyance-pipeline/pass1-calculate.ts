@@ -133,7 +133,7 @@ function computeStampDuty(
     );
   }
 
-  let offThePlanConcession = 0;
+  const offThePlanConcession = 0;
   if (input.isOffThePlan && input.isPpr) {
     // Off-the-plan concession (s 21) is calculated on dutiable-value AFTER
     // construction-cost deduction. We can't compute precisely without the cost

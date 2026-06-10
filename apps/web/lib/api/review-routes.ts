@@ -131,14 +131,18 @@ export function reviewEventsGET<TReview extends ReviewLike, TProgress>(opts: {
     const stream = new ReadableStream({
       async start(controller) {
         let closed = false;
-        let unsubscribe: (() => void) | undefined;
-        let keepAlive: ReturnType<typeof setInterval> | undefined;
+        // Held in an object: cleanup() can run (via send) before these are
+        // assigned, so they can't be plain consts.
+        const live: {
+          unsubscribe?: () => void;
+          keepAlive?: ReturnType<typeof setInterval>;
+        } = {};
 
         const cleanup = () => {
           if (closed) return;
           closed = true;
-          if (keepAlive) clearInterval(keepAlive);
-          if (unsubscribe) unsubscribe();
+          if (live.keepAlive) clearInterval(live.keepAlive);
+          if (live.unsubscribe) live.unsubscribe();
           try {
             controller.close();
           } catch {
@@ -169,7 +173,7 @@ export function reviewEventsGET<TReview extends ReviewLike, TProgress>(opts: {
           return;
         }
 
-        unsubscribe = opts.subscribe(id, (envelope) => {
+        live.unsubscribe = opts.subscribe(id, (envelope) => {
           send(envelope.event);
           const evt = envelope.event as { type?: string; review?: TReview };
           if (
@@ -183,7 +187,7 @@ export function reviewEventsGET<TReview extends ReviewLike, TProgress>(opts: {
         });
 
         // Keep-alive ping every 25s so proxies don't close the connection
-        keepAlive = setInterval(() => {
+        live.keepAlive = setInterval(() => {
           if (closed) return;
           try {
             controller.enqueue(encoder.encode(`: ping\n\n`));

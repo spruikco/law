@@ -76,6 +76,7 @@ export function ConveyanceViewer({ initial }: { initial: ConveyanceReview }) {
     lastEventAt,
     now,
     totalElapsedSec,
+    connection,
   } = stream;
 
   const stageIdx = STATUS_ORDER[review.status] ?? 0;
@@ -130,6 +131,7 @@ export function ConveyanceViewer({ initial }: { initial: ConveyanceReview }) {
         eventCount={eventCount}
         lastEventAt={lastEventAt}
         totalElapsedSec={totalElapsedSec}
+      connection={connection}
         deliverable={deliverable}
         findingsGroups={findingsGroups}
         particulars={<Particulars review={review} />}
@@ -186,7 +188,7 @@ function Overview({ review }: { review: ConveyanceReview }) {
               Settlement adjustments
             </h2>
             <p className="mt-1 text-xs text-zinc-500">
-              From the purchaser's perspective. Days shown as Vendor /
+              From the purchaser&apos;s perspective. Days shown as Vendor /
               Purchaser / Total.
             </p>
           </div>

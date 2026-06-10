@@ -11,6 +11,7 @@ import { Tabs, type TabDef } from "./tabs";
 import {
   fmtMs,
   type PipelineProgressEvent,
+  type StreamConnection,
 } from "./use-review-stream";
 
 export interface ExportLink {
@@ -56,6 +57,7 @@ export function ReviewShell({
   eventCount,
   lastEventAt,
   totalElapsedSec,
+  connection,
 
   // Tab content
   deliverable,
@@ -80,6 +82,7 @@ export function ReviewShell({
   eventCount: number;
   lastEventAt: number;
   totalElapsedSec: number;
+  connection?: StreamConnection;
 
   deliverable: DeliverableConfig;
   findingsGroups: FindingsGroup[];
@@ -160,6 +163,16 @@ export function ReviewShell({
         )}
       </header>
 
+      {!complete && !failed && connection === "reconnecting" && (
+        <div
+          role="status"
+          className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
+        >
+          Connection lost — reconnecting… The review keeps running on the
+          server; this page will catch up automatically.
+        </div>
+      )}
+
       {!complete && !failed && (
         <PipelineProgress
           stages={stages}
@@ -173,10 +186,12 @@ export function ReviewShell({
         />
       )}
 
-      {failed && errorText && (
+      {failed && (
         <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-900">
           <div className="mb-1 font-semibold">Pipeline failed</div>
-          <div className="whitespace-pre-wrap font-mono text-xs">{errorText}</div>
+          <div className="whitespace-pre-wrap font-mono text-xs">
+            {errorText || "No error detail was recorded. Try starting the review again."}
+          </div>
         </div>
       )}
 
